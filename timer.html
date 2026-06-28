@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>數數計時器</title>
+    <!-- 移除 Tailwind CDN，全部改為內聯原生 CSS 確保在任何環境下都能正常顯示 -->
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #0f172a;
+            color: #f1f5f9;
+            margin: 0;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 40px 20px;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        /* 隱藏數字輸入框的上下箭頭 */
+        input[type="number"]::-webkit-inner-spin-button, 
+        input[type="number"]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; margin: 0; 
+        }
+
+        .header { text-align: center; }
+        .title { font-size: 32px; font-weight: 700; margin: 0 0 8px 0; letter-spacing: 2px; }
+        .subtitle { color: #94a3b8; font-size: 14px; margin: 0; }
+
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+
+        .inputs { display: flex; align-items: center; gap: 16px; }
+        .input-col { display: flex; flex-direction: column; align-items: center; }
+        
+        input[type="number"] {
+            width: 80px;
+            height: 70px;
+            background-color: #1e293b;
+            border: 2px solid #334155;
+            color: #fff;
+            font-size: 40px;
+            font-weight: 700;
+            text-align: center;
+            border-radius: 16px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        input[type="number"]:focus { border-color: #4f46e5; }
+        
+        .colon { font-size: 48px; color: #475569; margin-bottom: 24px; font-weight: 300; }
+        label { font-size: 12px; color: #64748b; margin-top: 10px; font-weight: 600; letter-spacing: 1px; }
+
+        .display {
+            font-size: 88px;
+            font-weight: 800;
+            color: #818cf8;
+            display: none;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -2px;
+            font-family: monospace;
+        }
+
+        .status { font-size: 15px; color: #64748b; margin-top: 24px; height: 20px; font-weight: 500; }
+
+        .footer { width: 100%; max-width: 340px; display: flex; flex-direction: column; gap: 16px; }
+        
+        .btn {
+            width: 100%;
+            border: none;
+            border-radius: 16px;
+            padding: 20px;
+            font-size: 20px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.1s, background-color 0.2s;
+        }
+        .btn:active { transform: scale(0.96); }
+
+        .btn-toggle {
+            background-color: #1e293b;
+            border: 2px solid #334155;
+            color: #cbd5e1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 18px;
+            padding: 16px 20px;
+        }
+        
+        .badge {
+            background-color: #334155;
+            color: #cbd5e1;
+            font-size: 13px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+        .badge.on { background-color: rgba(16,185,129,0.2); color: #34d399; }
+
+        .btn-start { background-color: #4f46e5; color: #fff; box-shadow: 0 8px 20px rgba(79,70,229,0.4); }
+        .btn-stop { background-color: #1e293b; color: #f43f5e; display: none; border: 2px solid #334155; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="title">數數計時器</div>
+        <div class="subtitle">10秒報數 / 20秒提示</div>
+    </div>
+
+    <div class="main">
+        <div id="ig" class="inputs">
+            <div class="input-col">
+                <input type="number" id="m" value="10" min="0">
+                <label>分鐘</label>
+            </div>
+            <div class="colon">:</div>
+            <div class="input-col">
+                <input type="number" id="s" value="0" min="0" max="59">
+                <label>秒數</label>
+            </div>
+        </div>
+
+        <div id="d" class="display">10:00</div>
+        
+        <!-- 新增報數顯示區塊 (預設隱藏) -->
+        <div id="spokenDisplay" style="display: none; font-size: 24px; color: #34d399; font-weight: bold; margin-top: 20px; letter-spacing: 1px;">目前報數：0</div>
+
+        <div id="st" class="status">等待開始...</div>
+    </div>
+
+    <div class="footer">
+        <button id="tb" class="btn btn-toggle" onclick="tt()">
+            <span>每秒滴答聲</span>
+            <span id="ts" class="badge">已關閉</span>
+        </button>
+        <button id="sb" class="btn btn-start" onclick="start()">開始</button>
+        <button id="stb" class="btn btn-stop" onclick="stop()">重置</button>
+    </div>
+
+    <script>
+        let t = null, e = 0, tg = 0, ac = null, tk = false, ul = false;
+        
+        // 預載語音引擎
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.getVoices();
+        }
+
+        function fmt(s) {
+            let m = Math.floor(s / 60).toString().padStart(2, '0');
+            let se = (s % 60).toString().padStart(2, '0');
+            return m + ':' + se;
+        }
+
+        function tt() {
+            tk = !tk;
+            let s = document.getElementById('ts');
+            s.innerText = tk ? '已開啟' : '已關閉';
+            s.className = tk ? 'badge on' : 'badge';
+        }
+
+        function ia() {
+            if (!ac) ac = new (window.AudioContext || window.webkitAudioContext)();
+            if (ac.state === 'suspended') ac.resume();
+            if (!ul) {
+                // 解鎖 iOS 音效
+                let o = ac.createOscillator(), g = ac.createGain();
+                g.gain.value = 0; o.connect(g); g.connect(ac.destination);
+                o.start(); o.stop(ac.currentTime + 0.01);
+                // 解鎖 iOS 語音
+                if ('speechSynthesis' in window) window.speechSynthesis.speak(new SpeechSynthesisUtterance(''));
+                ul = true;
+            }
+        }
+
+        function pt() {
+            if (!tk || !ac) return;
+            let o = ac.createOscillator(), g = ac.createGain();
+            o.type = 'sine'; o.frequency.value = 1200;
+            g.gain.setValueAtTime(0.05, ac.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.05);
+            o.connect(g); g.connect(ac.destination);
+            o.start(); o.stop(ac.currentTime + 0.05);
+        }
+
+        function pf() {
+            if (!ac) return;
+            let o = ac.createOscillator(), g = ac.createGain();
+            o.type = 'triangle'; o.frequency.setValueAtTime(800, ac.currentTime);
+            o.frequency.exponentialRampToValueAtTime(100, ac.currentTime + 0.1);
+            g.gain.setValueAtTime(1, ac.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.01, ac.currentTime + 0.1);
+            o.connect(g); g.connect(ac.destination);
+            o.start(); o.stop(ac.currentTime + 0.1);
+        }
+
+        function sp(n) {
+            if (!('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel();
+
+            // 新增：更新畫面上的報數數字
+            document.getElementById('spokenDisplay').innerText = '目前報數：' + n;
+
+            let m = new SpeechSynthesisUtterance(n.toString());
+            m.lang = 'zh-TW';
+            let vs = window.speechSynthesis.getVoices();
+            let mv = vs.find(v => v.lang.includes('zh') && (v.name.toLowerCase().includes('male') || v.name.includes('男')));
+            let fb = vs.find(v => v.lang.includes('zh-TW'));
+            m.voice = mv || fb;
+            window.speechSynthesis.speak(m);
+        }
+
+        function start() {
+            if (t) return;
+            ia();
+            tg = (parseInt(document.getElementById('m').value) || 0) * 60 + (parseInt(document.getElementById('s').value) || 0);
+            if (tg <= 0) return;
+            
+            e = 0;
+            document.getElementById('ig').style.display = 'none';
+            document.getElementById('d').style.display = 'block';
+            
+            // 新增：開始時顯示並重置報數區塊
+            document.getElementById('spokenDisplay').style.display = 'block';
+            document.getElementById('spokenDisplay').innerText = '目前報數：0';
+
+            document.getElementById('sb').style.display = 'none';
+            document.getElementById('stb').style.display = 'block';
+            document.getElementById('st').innerText = '計時中...';
+            document.getElementById('st').style.color = '#818cf8';
+            document.getElementById('d').innerText = fmt(e);
+            
+            t = setInterval(() => {
+                e++;
+                document.getElementById('d').innerText = fmt(e);
+                
+                if (e % 10 === 0) {
+                    let stp = e / 10;
+                    if (stp % 2 !== 0) sp(Math.ceil(stp / 2));
+                    else pf();
+                } else {
+                    pt();
+                }
+
+                if (e >= tg) {
+                    stop();
+                    document.getElementById('st').innerText = '計時完成！';
+                    document.getElementById('st').style.color = '#34d399';
+                }
+            }, 1000);
+        }
+
+        function stop() {
+            if (t) clearInterval(t);
+            t = null; e = 0;
+            document.getElementById('ig').style.display = 'flex';
+            document.getElementById('d').style.display = 'none';
+            
+            // 新增：停止時隱藏報數區塊
+            document.getElementById('spokenDisplay').style.display = 'none';
+
+            document.getElementById('sb').style.display = 'block';
+            document.getElementById('stb').style.display = 'none';
+            document.getElementById('st').innerText = '等待開始...';
+            document.getElementById('st').style.color = '#64748b';
+            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+        }
+    </script>
+</body>
+</html>
