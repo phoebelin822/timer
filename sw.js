@@ -1,10 +1,14 @@
-const CACHE_NAME = 'timer-cache-v3';
+const CACHE_NAME = 'timer-cache-v4';
 const ASSETS = [
   './',
   './index.html',
   './manifest.json',
   './icons/icon-192.png',
-  './icons/icon-512.png'
+  './icons/icon-512.png',
+  './audio/start.mp3',
+  './audio/1.mp3',
+  './audio/2.mp3',
+  './audio/3.mp3'
 ];
 
 self.addEventListener('install', (event) => {
@@ -35,7 +39,13 @@ self.addEventListener('fetch', (event) => {
       if (cachedResponse) {
         return cachedResponse;
       }
-      return fetch(event.request).catch(() => caches.match('./index.html'));
+      return fetch(event.request).then((networkResponse) => {
+        if (event.request.url.includes('/audio/') && networkResponse.status === 200) {
+          const cloned = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, cloned));
+        }
+        return networkResponse;
+      }).catch(() => caches.match('./index.html'));
     })
   );
 });

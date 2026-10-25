@@ -805,24 +805,82 @@
         } catch (e) {}
     }
 
-    // 語音播報
-    function speakText(text) {
-        if (!speechEnabled || !('speechSynthesis' in window)) return;
+    // 音訊快取池與 2 倍放大音訊播放器
+    const audioBufferCache = new Map();
+
+    async function loadAudioBuffer(url) {
+        if (audioBufferCache.has(url)) return audioBufferCache.get(url);
         try {
-            window.speechSynthesis.cancel();
-            const utter = new SpeechSynthesisUtterance(text.toString());
-            utter.lang = 'zh-TW';
-            utter.rate = 1.0;
-            utter.pitch = 1.0;
+            const resp = await fetch(url);
+            if (!resp.ok) return null;
+            const arrayBuf = await resp.arrayBuffer();
+            const audioBuf = await audioCtx.decodeAudioData(arrayBuf);
+            audioBufferCache.set(url, audioBuf);
+            return audioBuf;
+        } catch (e) {
+            return null;
+        }
+    }
 
-            const voices = window.speechSynthesis.getVoices();
-            const preferred = voices.find(v => v.lang.includes('zh') && (v.name.includes('Hsiao') || v.name.includes('Yating') || v.name.includes('女') || v.name.toLowerCase().includes('taiwan')));
-            const fallback = voices.find(v => v.lang.includes('zh-TW')) || voices.find(v => v.lang.includes('zh'));
-            if (preferred) utter.voice = preferred;
-            else if (fallback) utter.voice = fallback;
+    async function playAudioFile(filename) {
+        if (!audioCtx) return false;
+        try {
+            const url = `./audio/${filename}`;
+            const buffer = await loadAudioBuffer(url);
+            if (!buffer) return false;
 
-            window.speechSynthesis.speak(utter);
-        } catch (e) {}
+            const source = audioCtx.createBufferSource();
+            source.buffer = buffer;
+
+            // 報數字音量調大二倍：再經過獨立增益 2.2x，並傳入 3.0x 主放大壓縮器
+            const voiceGain = audioCtx.createGain();
+            voiceGain.gain.setValueAtTime(2.2, audioCtx.currentTime);
+
+            const out = getAudioOutput() || audioCtx.destination;
+            source.connect(voiceGain);
+            voiceGain.connect(out);
+
+            source.start();
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    // 語音播報 (優先調用 2 倍放大高清晰 Neural 錄音檔，超出時無縫備援原生引擎)
+    async function speakText(text) {
+        if (!speechEnabled) return;
+        const str = text.toString();
+        let filename = null;
+        if (str === '開始') filename = 'start.mp3';
+        else if (/^\d+$/.test(str) && parseInt(str, 10) >= 1 && parseInt(str, 10) <= 100) {
+            filename = `${str}.mp3`;
+        }
+
+        if (filename && audioCtx) {
+            const played = await playAudioFile(filename);
+            if (played) return;
+        }
+
+        // 備用 SpeechSynthesis 原生引擎 (音量設為最大 1.0，微調頻率以提升穿透力)
+        if ('speechSynthesis' in window) {
+            try {
+                window.speechSynthesis.cancel();
+                const utter = new SpeechSynthesisUtterance(str);
+                utter.lang = 'zh-TW';
+                utter.volume = 1.0;
+                utter.rate = 0.95;
+                utter.pitch = 1.05;
+
+                const voices = window.speechSynthesis.getVoices();
+                const preferred = voices.find(v => v.lang.includes('zh') && (v.name.includes('Hsiao') || v.name.includes('Yating') || v.name.includes('女') || v.name.toLowerCase().includes('taiwan')));
+                const fallback = voices.find(v => v.lang.includes('zh-TW')) || voices.find(v => v.lang.includes('zh'));
+                if (preferred) utter.voice = preferred;
+                else if (fallback) utter.voice = fallback;
+
+                window.speechSynthesis.speak(utter);
+            } catch (e) {}
+        }
     }
 
     // 震動回饋 (行動裝置支援時)
