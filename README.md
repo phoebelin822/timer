@@ -47,7 +47,7 @@
    - 支援 iOS Safari「加入主畫面」與 Android 獨立 App 模式安裝，無網路亦可離線運行。
 
 6. **GitHub Pages 即開即用**：
-   - 根目錄包含標準 `index.html` 與相容 `timer.html`，啟用 GitHub Pages 即可直接部署上線。
+   - 根目錄包含標準 `index.html`，啟用 GitHub Pages 即可直接部署上線。
 
 ---
 
@@ -55,7 +55,6 @@
 
 ```text
 ├── index.html        # 主應用入口 (支援 GitHub Pages 預設加載)
-├── timer.html        # 相容入口文件
 ├── manifest.json     # PWA 應用設定檔
 ├── sw.js             # Service Worker 離線快取腳本
 ├── icons/            # PWA 高解析度圖標
