@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="timer數數計時器">
@@ -178,10 +180,10 @@
             background-color: var(--surface-light);
         }
 
-        .time-input::-webkit-inner-spin-button, 
-        .time-input::-webkit-outer-spin-button { 
-            -webkit-appearance: none; 
-            margin: 0; 
+        .time-input::-webkit-inner-spin-button,
+        .time-input::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
         }
 
         .time-colon {
@@ -261,9 +263,20 @@
         }
 
         @keyframes pulse-ring {
-            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-            70% { transform: scale(1.15); box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
-            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+            0% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            }
+
+            70% {
+                transform: scale(1.15);
+                box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+            }
+
+            100% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+            }
         }
 
         .count-text-label {
@@ -455,422 +468,381 @@
         }
     </style>
 </head>
+
 <body>
 
-<div class="container">
-    <!-- 標頭資訊 -->
-    <header class="header">
-        <h1 class="title">數數計時器</h1>
-        <p class="subtitle">10 秒語音報數 / 20 秒交替提示音</p>
-    </header>
+    <div class="container">
+        <!-- 標頭資訊 -->
+        <header class="header">
+            <h1 class="title">數數計時器</h1>
+            <p class="subtitle">10 秒語音報數 / 20 秒交替提示音</p>
+        </header>
 
-    <!-- 中央核心區 -->
-    <main class="main-stage">
-        <!-- 圓形進度環與時鐘 -->
-        <div class="timer-dial-container">
-            <svg class="dial-svg" viewBox="0 0 270 270">
-                <circle class="dial-bg" cx="135" cy="135" r="120"></circle>
-                <circle id="dialProgress" class="dial-progress" cx="135" cy="135" r="120"></circle>
-            </svg>
+        <!-- 中央核心區 -->
+        <main class="main-stage">
+            <!-- 圓形進度環與時鐘 -->
+            <div class="timer-dial-container">
+                <svg class="dial-svg" viewBox="0 0 270 270">
+                    <circle class="dial-bg" cx="135" cy="135" r="120"></circle>
+                    <circle id="dialProgress" class="dial-progress" cx="135" cy="135" r="120"></circle>
+                </svg>
 
-            <div class="dial-content">
-                <!-- 時間設定檢視 -->
-                <div id="inputsView" class="inputs-view">
-                    <div class="input-group">
-                        <input type="tel" inputmode="numeric" pattern="[0-9]*" id="inputMin" class="time-input" value="10" maxlength="3" aria-label="分鐘">
-                        <span class="input-label">分鐘</span>
+                <div class="dial-content">
+                    <!-- 時間設定檢視 -->
+                    <div id="inputsView" class="inputs-view">
+                        <div class="input-group">
+                            <input type="tel" inputmode="numeric" pattern="[0-9]*" id="inputMin" class="time-input"
+                                value="10" maxlength="3" aria-label="分鐘">
+                            <span class="input-label">分鐘</span>
+                        </div>
+                        <div class="time-colon">:</div>
+                        <div class="input-group">
+                            <input type="tel" inputmode="numeric" pattern="[0-9]*" id="inputSec" class="time-input"
+                                value="0" maxlength="2" aria-label="秒數">
+                            <span class="input-label">秒數</span>
+                        </div>
                     </div>
-                    <div class="time-colon">:</div>
-                    <div class="input-group">
-                        <input type="tel" inputmode="numeric" pattern="[0-9]*" id="inputSec" class="time-input" value="0" maxlength="2" aria-label="秒數">
-                        <span class="input-label">秒數</span>
-                    </div>
-                </div>
 
-                <!-- 運行時間檢視 -->
-                <div id="runningView" class="running-view">
-                    <p id="timeDisplay" class="time-display">00:00</p>
-                    <span id="targetSubtext" class="target-subtext">目標 10:00</span>
+                    <!-- 運行時間檢視 -->
+                    <div id="runningView" class="running-view">
+                        <p id="timeDisplay" class="time-display">00:00</p>
+                        <span id="targetSubtext" class="target-subtext">目標 10:00</span>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- 當前報數與即時狀態整合卡片 -->
-        <div class="count-card">
-            <div id="countIndicator" class="count-badge-indicator"></div>
-            <span class="count-text-label">當前報數</span>
-            <span id="countNumberVal" class="count-number-val">0</span>
-            <span class="status-divider">·</span>
-            <span id="statusCaption" class="status-caption">等待開始...</span>
-        </div>
-    </main>
+            <!-- 當前報數與即時狀態整合卡片 -->
+            <div class="count-card">
+                <div id="countIndicator" class="count-badge-indicator"></div>
+                <span class="count-text-label">當前報數</span>
+                <span id="countNumberVal" class="count-number-val">0</span>
+                <span class="status-divider">·</span>
+                <span id="statusCaption" class="status-caption">等待開始...</span>
+            </div>
+        </main>
 
-    <!-- 控制面版與設定 -->
-    <footer class="controls-panel">
-        <div class="settings-bar">
-            <button id="toggleTickBtn" class="toggle-btn" type="button" onclick="toggleTick()">
-                <span>每秒木魚聲</span>
-                <span class="pill-switch"></span>
-            </button>
-            <button id="toggleSpeechBtn" class="toggle-btn active" type="button" onclick="toggleSpeech()">
-                <span>語音報數</span>
-                <span class="pill-switch"></span>
-            </button>
-        </div>
+        <!-- 控制面版與設定 -->
+        <footer class="controls-panel">
+            <div class="settings-bar">
+                <button id="toggleTickBtn" class="toggle-btn" type="button" onclick="toggleTick()">
+                    <span>每秒木魚聲</span>
+                    <span class="pill-switch"></span>
+                </button>
+                <button id="toggleSpeechBtn" class="toggle-btn active" type="button" onclick="toggleSpeech()">
+                    <span>語音報數</span>
+                    <span class="pill-switch"></span>
+                </button>
+            </div>
 
-        <div class="action-btns">
-            <!-- 開始按鈕 -->
-            <button id="btnStart" class="btn btn-primary" type="button" onclick="handleStart()">
-                <svg class="icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                <span>開始計時</span>
-            </button>
+            <div class="action-btns">
+                <!-- 開始按鈕 -->
+                <button id="btnStart" class="btn btn-primary" type="button" onclick="handleStart()">
+                    <svg class="icon" viewBox="0 0 24 24">
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                    <span>開始計時</span>
+                </button>
 
-            <!-- 暫停按鈕 -->
-            <button id="btnPause" class="btn btn-pause" type="button" style="display: none;" onclick="handlePause()">
-                <svg class="icon" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
-                <span>暫停</span>
-            </button>
+                <!-- 暫停按鈕 -->
+                <button id="btnPause" class="btn btn-pause" type="button" style="display: none;"
+                    onclick="handlePause()">
+                    <svg class="icon" viewBox="0 0 24 24">
+                        <rect x="6" y="4" width="4" height="16"></rect>
+                        <rect x="14" y="4" width="4" height="16"></rect>
+                    </svg>
+                    <span>暫停</span>
+                </button>
 
-            <!-- 繼續按鈕 -->
-            <button id="btnResume" class="btn btn-resume" type="button" style="display: none;" onclick="handleResume()">
-                <svg class="icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                <span>繼續</span>
-            </button>
+                <!-- 繼續按鈕 -->
+                <button id="btnResume" class="btn btn-resume" type="button" style="display: none;"
+                    onclick="handleResume()">
+                    <svg class="icon" viewBox="0 0 24 24">
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                    <span>繼續</span>
+                </button>
 
-            <!-- 重置按鈕 -->
-            <button id="btnReset" class="btn btn-reset" type="button" style="display: none;" onclick="handleReset()">
-                <svg class="icon" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
-            </button>
-        </div>
+                <!-- 重置按鈕 -->
+                <button id="btnReset" class="btn btn-reset" type="button" style="display: none;"
+                    onclick="handleReset()">
+                    <svg class="icon" viewBox="0 0 24 24">
+                        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                        <path d="M3 3v5h5"></path>
+                    </svg>
+                </button>
+            </div>
 
-        <div class="footer-info">
-            支援 iOS / Android PWA 離線安裝與螢幕常亮防止休眠
-        </div>
-    </footer>
-</div>
+            <div class="footer-info">
+                支援 iOS / Android PWA 離線安裝與螢幕常亮防止休眠
+            </div>
+        </footer>
+    </div>
 
-<script>
-    // 狀態變數
-    let timerState = 'idle'; // 'idle' | 'warmup' | 'warmup_paused' | 'running' | 'paused' | 'finished'
-    let warmupRemaining = 10;
-    const WARMUP_TOTAL = 10;
-    let elapsedSeconds = 0;
-    let targetSeconds = 0;
-    let audioCtx = null;
-    let tickEnabled = false;
-    let speechEnabled = true;
-    let audioUnlocked = false;
-    let wakeLock = null;
-    let timerWorker = null;
+    <script>
+        // 狀態變數
+        let timerState = 'idle'; // 'idle' | 'warmup' | 'warmup_paused' | 'running' | 'paused' | 'finished'
+        let warmupRemaining = 10;
+        const WARMUP_TOTAL = 10;
+        let elapsedSeconds = 0;
+        let targetSeconds = 0;
+        let audioCtx = null;
+        let tickEnabled = false;
+        let speechEnabled = true;
+        let audioUnlocked = false;
+        let wakeLock = null;
+        let timerWorker = null;
 
-    const CIRCUMFERENCE = 2 * Math.PI * 120; // 約 753.98
+        const CIRCUMFERENCE = 2 * Math.PI * 120; // 約 753.98
 
-    // DOM 元素快取
-    const inputMin = document.getElementById('inputMin');
-    const inputSec = document.getElementById('inputSec');
-    const inputsView = document.getElementById('inputsView');
-    const runningView = document.getElementById('runningView');
-    const timeDisplay = document.getElementById('timeDisplay');
-    const targetSubtext = document.getElementById('targetSubtext');
-    const dialProgress = document.getElementById('dialProgress');
-    const countNumberVal = document.getElementById('countNumberVal');
-    const countIndicator = document.getElementById('countIndicator');
-    const statusCaption = document.getElementById('statusCaption');
-    const btnStart = document.getElementById('btnStart');
-    const btnPause = document.getElementById('btnPause');
-    const btnResume = document.getElementById('btnResume');
-    const btnReset = document.getElementById('btnReset');
-    const toggleTickBtn = document.getElementById('toggleTickBtn');
-    const toggleSpeechBtn = document.getElementById('toggleSpeechBtn');
+        // DOM 元素快取
+        const inputMin = document.getElementById('inputMin');
+        const inputSec = document.getElementById('inputSec');
+        const inputsView = document.getElementById('inputsView');
+        const runningView = document.getElementById('runningView');
+        const timeDisplay = document.getElementById('timeDisplay');
+        const targetSubtext = document.getElementById('targetSubtext');
+        const dialProgress = document.getElementById('dialProgress');
+        const countNumberVal = document.getElementById('countNumberVal');
+        const countIndicator = document.getElementById('countIndicator');
+        const statusCaption = document.getElementById('statusCaption');
+        const btnStart = document.getElementById('btnStart');
+        const btnPause = document.getElementById('btnPause');
+        const btnResume = document.getElementById('btnResume');
+        const btnReset = document.getElementById('btnReset');
+        const toggleTickBtn = document.getElementById('toggleTickBtn');
+        const toggleSpeechBtn = document.getElementById('toggleSpeechBtn');
 
-    // 格式化秒數為 mm:ss
-    function formatTime(sec) {
-        const m = Math.floor(sec / 60).toString().padStart(2, '0');
-        const s = (sec % 60).toString().padStart(2, '0');
-        return `${m}:${s}`;
-    }
-
-    // 更新進度環
-    function updateProgress(elapsed, total, colorOverride = null) {
-        if (!total || total <= 0) {
-            dialProgress.style.strokeDashoffset = CIRCUMFERENCE;
-            return;
+        // 格式化秒數為 mm:ss
+        function formatTime(sec) {
+            const m = Math.floor(sec / 60).toString().padStart(2, '0');
+            const s = (sec % 60).toString().padStart(2, '0');
+            return `${m}:${s}`;
         }
-        const ratio = Math.min(elapsed / total, 1);
-        const offset = CIRCUMFERENCE - (ratio * CIRCUMFERENCE);
-        dialProgress.style.strokeDashoffset = offset;
 
-        if (colorOverride) {
-            dialProgress.style.stroke = colorOverride;
-        } else if (ratio >= 1) {
-            dialProgress.style.stroke = 'var(--success-color)';
-        } else {
-            dialProgress.style.stroke = 'var(--accent-primary)';
-        }
-    }
-
-    // 滴答聲開關切換
-    function toggleTick() {
-        tickEnabled = !tickEnabled;
-        toggleTickBtn.classList.toggle('active', tickEnabled);
-        if (tickEnabled && !audioUnlocked) initAudio();
-    }
-
-    // 語音報數開關切換
-    function toggleSpeech() {
-        speechEnabled = !speechEnabled;
-        toggleSpeechBtn.classList.toggle('active', speechEnabled);
-    }
-
-    // 螢幕常亮喚醒鎖 (Screen Wake Lock API)
-    async function requestWakeLock() {
-        try {
-            if ('wakeLock' in navigator && !wakeLock) {
-                wakeLock = await navigator.wakeLock.request('screen');
-                wakeLock.addEventListener('release', () => {
-                    wakeLock = null;
-                });
+        // 更新進度環
+        function updateProgress(elapsed, total, colorOverride = null) {
+            if (!total || total <= 0) {
+                dialProgress.style.strokeDashoffset = CIRCUMFERENCE;
+                return;
             }
-        } catch (err) {}
-    }
+            const ratio = Math.min(elapsed / total, 1);
+            const offset = CIRCUMFERENCE - (ratio * CIRCUMFERENCE);
+            dialProgress.style.strokeDashoffset = offset;
 
-    function releaseWakeLock() {
-        if (wakeLock) {
-            wakeLock.release().catch(() => {});
-            wakeLock = null;
-        }
-    }
-
-    let masterCompressor = null;
-    let masterGain = null;
-
-    // 取得音訊增益與動態壓縮輸出端 (放大 200%，即 3 倍功率輸出，並防破音破頻)
-    function getAudioOutput() {
-        if (!audioCtx) return null;
-        if (!masterCompressor) {
-            masterCompressor = audioCtx.createDynamicsCompressor();
-            masterCompressor.threshold.setValueAtTime(-14, audioCtx.currentTime);
-            masterCompressor.knee.setValueAtTime(25, audioCtx.currentTime);
-            masterCompressor.ratio.setValueAtTime(12, audioCtx.currentTime);
-            masterCompressor.attack.setValueAtTime(0.002, audioCtx.currentTime);
-            masterCompressor.release.setValueAtTime(0.2, audioCtx.currentTime);
-
-            masterGain = audioCtx.createGain();
-            // 音量全面再放大 200% (3 倍功率輸出)
-            masterGain.gain.setValueAtTime(3.0, audioCtx.currentTime);
-
-            masterCompressor.connect(masterGain);
-            masterGain.connect(audioCtx.destination);
-        }
-        return masterCompressor;
-    }
-
-    // 音訊引擎初始化與 iOS 解鎖
-    function initAudio() {
-        if (!audioCtx) {
-            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-            if (AudioContextClass) {
-                audioCtx = new AudioContextClass();
+            if (colorOverride) {
+                dialProgress.style.stroke = colorOverride;
+            } else if (ratio >= 1) {
+                dialProgress.style.stroke = 'var(--success-color)';
+            } else {
+                dialProgress.style.stroke = 'var(--accent-primary)';
             }
         }
-        if (audioCtx && audioCtx.state === 'suspended') {
-            audioCtx.resume();
-        }
-        if (!audioUnlocked && audioCtx) {
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            gain.gain.value = 0;
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.01);
 
-            if ('speechSynthesis' in window) {
-                const dummy = new SpeechSynthesisUtterance('');
-                dummy.volume = 0;
-                window.speechSynthesis.speak(dummy);
+        // 滴答聲開關切換
+        function toggleTick() {
+            tickEnabled = !tickEnabled;
+            toggleTickBtn.classList.toggle('active', tickEnabled);
+            if (tickEnabled && !audioUnlocked) initAudio();
+        }
+
+        // 語音報數開關切換
+        function toggleSpeech() {
+            speechEnabled = !speechEnabled;
+            toggleSpeechBtn.classList.toggle('active', speechEnabled);
+        }
+
+        // 螢幕常亮喚醒鎖 (Screen Wake Lock API)
+        async function requestWakeLock() {
+            try {
+                if ('wakeLock' in navigator && !wakeLock) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                    wakeLock.addEventListener('release', () => {
+                        wakeLock = null;
+                    });
+                }
+            } catch (err) { }
+        }
+
+        function releaseWakeLock() {
+            if (wakeLock) {
+                wakeLock.release().catch(() => { });
+                wakeLock = null;
             }
-            audioUnlocked = true;
         }
-    }
 
-    // 每秒敲木魚聲 (合成空靈清脆木魚共鳴，音量全面放大 200%)
-    function playTickSound() {
-        if (!tickEnabled || !audioCtx) return;
-        try {
-            const now = audioCtx.currentTime;
-            const out = getAudioOutput() || audioCtx.destination;
+        let masterCompressor = null;
+        let masterGain = null;
 
-            // 木魚腔體主共鳴 (由 680Hz 迅速滑落至 520Hz)
-            const oscBody = audioCtx.createOscillator();
-            const gainBody = audioCtx.createGain();
-            oscBody.type = 'sine';
-            oscBody.frequency.setValueAtTime(680, now);
-            oscBody.frequency.exponentialRampToValueAtTime(520, now + 0.05);
+        // 取得音訊增益與動態壓縮輸出端 (放大 200%，即 3 倍功率輸出，並防破音破頻)
+        function getAudioOutput() {
+            if (!audioCtx) return null;
+            if (!masterCompressor) {
+                masterCompressor = audioCtx.createDynamicsCompressor();
+                masterCompressor.threshold.setValueAtTime(-14, audioCtx.currentTime);
+                masterCompressor.knee.setValueAtTime(25, audioCtx.currentTime);
+                masterCompressor.ratio.setValueAtTime(12, audioCtx.currentTime);
+                masterCompressor.attack.setValueAtTime(0.002, audioCtx.currentTime);
+                masterCompressor.release.setValueAtTime(0.2, audioCtx.currentTime);
 
-            gainBody.gain.setValueAtTime(1.2, now);
-            gainBody.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+                masterGain = audioCtx.createGain();
+                // 音量全面再放大 200% (3 倍功率輸出)
+                masterGain.gain.setValueAtTime(3.0, audioCtx.currentTime);
 
-            oscBody.connect(gainBody);
-            gainBody.connect(out);
-            oscBody.start(now);
-            oscBody.stop(now + 0.095);
+                masterCompressor.connect(masterGain);
+                masterGain.connect(audioCtx.destination);
+            }
+            return masterCompressor;
+        }
 
-            // 木槌敲擊接觸點泛音 (1320Hz 泛音)
-            const oscClick = audioCtx.createOscillator();
-            const gainClick = audioCtx.createGain();
-            oscClick.type = 'triangle';
-            oscClick.frequency.setValueAtTime(1320, now);
-            gainClick.gain.setValueAtTime(0.5, now);
-            gainClick.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
+        // 音訊引擎初始化與 iOS 解鎖
+        function initAudio() {
+            if (!audioCtx) {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) {
+                    audioCtx = new AudioContextClass();
+                }
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            if (!audioUnlocked && audioCtx) {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                gain.gain.value = 0;
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.01);
 
-            oscClick.connect(gainClick);
-            gainClick.connect(out);
-            oscClick.start(now);
-            oscClick.stop(now + 0.035);
-        } catch (e) {}
-    }
+                if ('speechSynthesis' in window) {
+                    const dummy = new SpeechSynthesisUtterance('');
+                    dummy.volume = 0;
+                    window.speechSynthesis.speak(dummy);
+                }
+                audioUnlocked = true;
+            }
+        }
 
-    // 備用原始滴答聲 (可隨時切換)
-    function playClassicTickSound() {
-        if (!tickEnabled || !audioCtx) return;
-        try {
-            const now = audioCtx.currentTime;
-            const out = getAudioOutput() || audioCtx.destination;
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(1400, now);
-            gain.gain.setValueAtTime(0.8, now);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.035);
-            osc.connect(gain);
-            gain.connect(out);
-            osc.start();
-            osc.stop(now + 0.04);
-        } catch (e) {}
-    }
+        // 每秒敲木魚聲 (合成空靈清脆木魚共鳴，音量全面放大 200%)
+        function playTickSound() {
+            if (!tickEnabled || !audioCtx) return;
+            try {
+                const now = audioCtx.currentTime;
+                const out = getAudioOutput() || audioCtx.destination;
 
-    // 每 20 秒交替提示音 (清脆雙音階提示，音量全面放大 200%)
-    function playCueSound() {
-        if (!audioCtx) return;
-        try {
-            const now = audioCtx.currentTime;
-            const out = getAudioOutput() || audioCtx.destination;
-            
-            // 第 1 音
-            const osc1 = audioCtx.createOscillator();
-            const gain1 = audioCtx.createGain();
-            osc1.type = 'triangle';
-            osc1.frequency.setValueAtTime(659.25, now); // E5
-            gain1.gain.setValueAtTime(1.4, now);
-            gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
-            osc1.connect(gain1);
-            gain1.connect(out);
-            osc1.start(now);
-            osc1.stop(now + 0.18);
+                // 木魚腔體主共鳴 (由 680Hz 迅速滑落至 520Hz)
+                const oscBody = audioCtx.createOscillator();
+                const gainBody = audioCtx.createGain();
+                oscBody.type = 'sine';
+                oscBody.frequency.setValueAtTime(680, now);
+                oscBody.frequency.exponentialRampToValueAtTime(520, now + 0.05);
 
-            // 第 2 音
-            const osc2 = audioCtx.createOscillator();
-            const gain2 = audioCtx.createGain();
-            osc2.type = 'triangle';
-            osc2.frequency.setValueAtTime(987.77, now + 0.08); // B5
-            gain2.gain.setValueAtTime(1.6, now + 0.08);
-            gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
-            osc2.connect(gain2);
-            gain2.connect(out);
-            osc2.start(now + 0.08);
-            osc2.stop(now + 0.35);
-        } catch (e) {}
-    }
+                gainBody.gain.setValueAtTime(1.2, now);
+                gainBody.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
 
-    // 完成時的和弦音效
-    function playFinishedChime() {
-        if (!audioCtx) return;
-        try {
-            const out = getAudioOutput() || audioCtx.destination;
-            const chord = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
-            chord.forEach((freq, idx) => {
-                const now = audioCtx.currentTime + (idx * 0.08);
+                oscBody.connect(gainBody);
+                gainBody.connect(out);
+                oscBody.start(now);
+                oscBody.stop(now + 0.095);
+
+                // 木槌敲擊接觸點泛音 (1320Hz 泛音)
+                const oscClick = audioCtx.createOscillator();
+                const gainClick = audioCtx.createGain();
+                oscClick.type = 'triangle';
+                oscClick.frequency.setValueAtTime(1320, now);
+                gainClick.gain.setValueAtTime(0.5, now);
+                gainClick.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
+
+                oscClick.connect(gainClick);
+                gainClick.connect(out);
+                oscClick.start(now);
+                oscClick.stop(now + 0.035);
+            } catch (e) { }
+        }
+
+        // 備用原始滴答聲 (可隨時切換)
+        function playClassicTickSound() {
+            if (!tickEnabled || !audioCtx) return;
+            try {
+                const now = audioCtx.currentTime;
+                const out = getAudioOutput() || audioCtx.destination;
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
                 osc.type = 'sine';
-                osc.frequency.setValueAtTime(freq, now);
-                gain.gain.setValueAtTime(0.7, now);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.85);
+                osc.frequency.setValueAtTime(1400, now);
+                gain.gain.setValueAtTime(0.8, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.035);
                 osc.connect(gain);
                 gain.connect(out);
-                osc.start(now);
-                osc.stop(now + 0.9);
-            });
-        } catch (e) {}
-    }
-
-    // 音訊快取池與 2 倍放大音訊播放器
-    const audioBufferCache = new Map();
-
-    async function loadAudioBuffer(url) {
-        if (audioBufferCache.has(url)) return audioBufferCache.get(url);
-        try {
-            const resp = await fetch(url);
-            if (!resp.ok) return null;
-            const arrayBuf = await resp.arrayBuffer();
-            const audioBuf = await audioCtx.decodeAudioData(arrayBuf);
-            audioBufferCache.set(url, audioBuf);
-            return audioBuf;
-        } catch (e) {
-            return null;
-        }
-    }
-
-    async function playAudioFile(filename) {
-        if (!audioCtx) return false;
-        try {
-            const url = `./audio/${filename}`;
-            const buffer = await loadAudioBuffer(url);
-            if (!buffer) return false;
-
-            const source = audioCtx.createBufferSource();
-            source.buffer = buffer;
-
-            // 報數字音量調大二倍：再經過獨立增益 2.2x，並傳入 3.0x 主放大壓縮器
-            const voiceGain = audioCtx.createGain();
-            voiceGain.gain.setValueAtTime(2.2, audioCtx.currentTime);
-
-            const out = getAudioOutput() || audioCtx.destination;
-            source.connect(voiceGain);
-            voiceGain.connect(out);
-
-            source.start();
-            return true;
-        } catch (e) {
-            return false;
-        }
-    }
-
-    // 語音播報 (優先調用 2 倍放大高清晰 Neural 錄音檔，超出時無縫備援原生引擎)
-    async function speakText(text) {
-        if (!speechEnabled) return;
-        const str = text.toString();
-        let filename = null;
-        if (str === '開始') filename = 'start.mp3';
-        else if (/^\d+$/.test(str) && parseInt(str, 10) >= 1 && parseInt(str, 10) <= 100) {
-            filename = `${str}.mp3`;
+                osc.start();
+                osc.stop(now + 0.04);
+            } catch (e) { }
         }
 
-        if (filename && audioCtx) {
-            const played = await playAudioFile(filename);
-            if (played) return;
+        // 每 20 秒交替提示音 (清脆雙音階提示，音量全面放大 200%)
+        function playCueSound() {
+            if (!audioCtx) return;
+            try {
+                const now = audioCtx.currentTime;
+                const out = getAudioOutput() || audioCtx.destination;
+
+                // 第 1 音
+                const osc1 = audioCtx.createOscillator();
+                const gain1 = audioCtx.createGain();
+                osc1.type = 'triangle';
+                osc1.frequency.setValueAtTime(659.25, now); // E5
+                gain1.gain.setValueAtTime(1.4, now);
+                gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
+                osc1.connect(gain1);
+                gain1.connect(out);
+                osc1.start(now);
+                osc1.stop(now + 0.18);
+
+                // 第 2 音
+                const osc2 = audioCtx.createOscillator();
+                const gain2 = audioCtx.createGain();
+                osc2.type = 'triangle';
+                osc2.frequency.setValueAtTime(987.77, now + 0.08); // B5
+                gain2.gain.setValueAtTime(1.6, now + 0.08);
+                gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+                osc2.connect(gain2);
+                gain2.connect(out);
+                osc2.start(now + 0.08);
+                osc2.stop(now + 0.35);
+            } catch (e) { }
         }
 
-        // 備用 SpeechSynthesis 原生引擎 (音量設為最大 1.0，微調頻率以提升穿透力)
-        if ('speechSynthesis' in window) {
+        // 完成時的和弦音效
+        function playFinishedChime() {
+            if (!audioCtx) return;
+            try {
+                const out = getAudioOutput() || audioCtx.destination;
+                const chord = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+                chord.forEach((freq, idx) => {
+                    const now = audioCtx.currentTime + (idx * 0.08);
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, now);
+                    gain.gain.setValueAtTime(0.7, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.85);
+                    osc.connect(gain);
+                    gain.connect(out);
+                    osc.start(now);
+                    osc.stop(now + 0.9);
+                });
+            } catch (e) { }
+        }
+
+        // 語音播報
+        function speakText(text) {
+            if (!speechEnabled || !('speechSynthesis' in window)) return;
             try {
                 window.speechSynthesis.cancel();
-                const utter = new SpeechSynthesisUtterance(str);
+                const utter = new SpeechSynthesisUtterance(text.toString());
                 utter.lang = 'zh-TW';
-                utter.volume = 1.0;
-                utter.rate = 0.95;
-                utter.pitch = 1.05;
+                utter.rate = 1.0;
+                utter.pitch = 1.0;
 
                 const voices = window.speechSynthesis.getVoices();
                 const preferred = voices.find(v => v.lang.includes('zh') && (v.name.includes('Hsiao') || v.name.includes('Yating') || v.name.includes('女') || v.name.toLowerCase().includes('taiwan')));
@@ -879,20 +851,19 @@
                 else if (fallback) utter.voice = fallback;
 
                 window.speechSynthesis.speak(utter);
-            } catch (e) {}
+            } catch (e) { }
         }
-    }
 
-    // 震動回饋 (行動裝置支援時)
-    function triggerHaptic(duration = 20) {
-        if ('vibrate' in navigator) {
-            try { navigator.vibrate(duration); } catch (e) {}
+        // 震動回饋 (行動裝置支援時)
+        function triggerHaptic(duration = 20) {
+            if ('vibrate' in navigator) {
+                try { navigator.vibrate(duration); } catch (e) { }
+            }
         }
-    }
 
-    // Web Worker 後台高精準計時器
-    function createWorkerTimer() {
-        const workerBlob = new Blob([`
+        // Web Worker 後台高精準計時器
+        function createWorkerTimer() {
+            const workerBlob = new Blob([`
             let interval = null;
             self.onmessage = function(e) {
                 if (e.data === 'start') {
@@ -906,259 +877,260 @@
                 }
             };
         `], { type: 'application/javascript' });
-        return new Worker(URL.createObjectURL(workerBlob));
-    }
+            return new Worker(URL.createObjectURL(workerBlob));
+        }
 
-    // 每秒步進核心邏輯
-    function onSecondTick() {
-        // 熱身預備階段處理 (10秒，最後3秒語音倒數 3, 2, 1)
-        if (timerState === 'warmup') {
-            warmupRemaining--;
+        // 每秒步進核心邏輯
+        function onSecondTick() {
+            // 熱身預備階段處理 (10秒，最後3秒語音倒數 3, 2, 1)
+            if (timerState === 'warmup') {
+                warmupRemaining--;
 
-            // 更新熱身倒數文字與進度環 (以暖色呈現)
-            timeDisplay.innerText = formatTime(warmupRemaining);
-            updateProgress(WARMUP_TOTAL - warmupRemaining, WARMUP_TOTAL, 'var(--warning-color)');
+                // 更新熱身倒數文字與進度環 (以暖色呈現)
+                timeDisplay.innerText = formatTime(warmupRemaining);
+                updateProgress(WARMUP_TOTAL - warmupRemaining, WARMUP_TOTAL, 'var(--warning-color)');
 
-            if (warmupRemaining <= 3 && warmupRemaining >= 1) {
-                // 最後 3 秒進行語音倒數 (3, 2, 1)
-                speakText(warmupRemaining.toString());
-                countIndicator.classList.add('pulsing');
-                triggerHaptic(35);
-                setTimeout(() => countIndicator.classList.remove('pulsing'), 900);
+                if (warmupRemaining <= 3 && warmupRemaining >= 1) {
+                    // 最後 3 秒進行語音倒數 (3, 2, 1)
+                    speakText(warmupRemaining.toString());
+                    countIndicator.classList.add('pulsing');
+                    triggerHaptic(35);
+                    setTimeout(() => countIndicator.classList.remove('pulsing'), 900);
+                } else {
+                    playTickSound();
+                }
+
+                // 熱身結束，立即進入正式計時
+                if (warmupRemaining <= 0) {
+                    timerState = 'running';
+                    elapsedSeconds = 0;
+
+                    timeDisplay.innerText = formatTime(0);
+                    targetSubtext.innerText = `目標 ${formatTime(targetSeconds)}`;
+                    countNumberVal.innerText = '0';
+                    statusCaption.innerText = '正式計時中...';
+                    statusCaption.style.color = 'var(--accent-primary)';
+                    updateProgress(0, targetSeconds);
+
+                    // 播放開始提示音與語音
+                    playCueSound();
+                    speakText('開始');
+                    triggerHaptic([60, 40, 60]);
+                }
+                return;
+            }
+
+            // 正式計時階段處理
+            if (timerState !== 'running') return;
+            elapsedSeconds++;
+
+            // 更新畫面時間與進度環
+            timeDisplay.innerText = formatTime(elapsedSeconds);
+            updateProgress(elapsedSeconds, targetSeconds);
+
+            // 規則核心：每 10 秒週期判定
+            if (elapsedSeconds % 10 === 0) {
+                const step = elapsedSeconds / 10;
+                if (step % 2 !== 0) {
+                    // 10s, 30s, 50s, 70s... 語音報數
+                    const countNum = Math.ceil(step / 2);
+                    countNumberVal.innerText = countNum;
+                    countIndicator.classList.add('pulsing');
+                    speakText(countNum.toString());
+                    triggerHaptic(40);
+                    setTimeout(() => countIndicator.classList.remove('pulsing'), 1000);
+                } else {
+                    // 20s, 40s, 60s, 80s... 提示音效
+                    playCueSound();
+                    triggerHaptic([20, 40, 20]);
+                }
             } else {
+                // 一般秒數播放木魚聲
                 playTickSound();
             }
 
-            // 熱身結束，立即進入正式計時
-            if (warmupRemaining <= 0) {
-                timerState = 'running';
-                elapsedSeconds = 0;
-
-                timeDisplay.innerText = formatTime(0);
-                targetSubtext.innerText = `目標 ${formatTime(targetSeconds)}`;
-                countNumberVal.innerText = '0';
-                statusCaption.innerText = '正式計時中...';
-                statusCaption.style.color = 'var(--accent-primary)';
-                updateProgress(0, targetSeconds);
-
-                // 播放開始提示音與語音
-                playCueSound();
-                speakText('開始');
-                triggerHaptic([60, 40, 60]);
+            // 達到目標時間完成
+            if (elapsedSeconds >= targetSeconds) {
+                handleComplete();
             }
-            return;
         }
 
-        // 正式計時階段處理
-        if (timerState !== 'running') return;
-        elapsedSeconds++;
+        // 啟動計時 (預設直接進入 10 秒熱身階段)
+        function handleStart() {
+            initAudio();
+            const m = parseInt(inputMin.value, 10) || 0;
+            const s = parseInt(inputSec.value, 10) || 0;
+            targetSeconds = (m * 60) + s;
 
-        // 更新畫面時間與進度環
-        timeDisplay.innerText = formatTime(elapsedSeconds);
-        updateProgress(elapsedSeconds, targetSeconds);
-
-        // 規則核心：每 10 秒週期判定
-        if (elapsedSeconds % 10 === 0) {
-            const step = elapsedSeconds / 10;
-            if (step % 2 !== 0) {
-                // 10s, 30s, 50s, 70s... 語音報數
-                const countNum = Math.ceil(step / 2);
-                countNumberVal.innerText = countNum;
-                countIndicator.classList.add('pulsing');
-                speakText(countNum.toString());
-                triggerHaptic(40);
-                setTimeout(() => countIndicator.classList.remove('pulsing'), 1000);
-            } else {
-                // 20s, 40s, 60s, 80s... 提示音效
-                playCueSound();
-                triggerHaptic([20, 40, 20]);
+            if (targetSeconds <= 0) {
+                statusCaption.innerText = '請設定大於 0 秒的時間';
+                statusCaption.style.color = 'var(--warning-color)';
+                return;
             }
-        } else {
-            // 一般秒數播放木魚聲
-            playTickSound();
-        }
 
-        // 達到目標時間完成
-        if (elapsedSeconds >= targetSeconds) {
-            handleComplete();
-        }
-    }
+            timerState = 'warmup';
+            warmupRemaining = WARMUP_TOTAL;
+            elapsedSeconds = 0;
 
-    // 啟動計時 (預設直接進入 10 秒熱身階段)
-    function handleStart() {
-        initAudio();
-        const m = parseInt(inputMin.value, 10) || 0;
-        const s = parseInt(inputSec.value, 10) || 0;
-        targetSeconds = (m * 60) + s;
-
-        if (targetSeconds <= 0) {
-            statusCaption.innerText = '請設定大於 0 秒的時間';
+            // UI 狀態切換為熱身倒數模式
+            inputsView.style.display = 'none';
+            runningView.style.display = 'flex';
+            timeDisplay.innerText = formatTime(warmupRemaining);
+            targetSubtext.innerText = `準備中 (目標 ${formatTime(targetSeconds)})`;
+            countNumberVal.innerText = '預備';
+            countIndicator.className = 'count-badge-indicator active';
+            statusCaption.innerText = '熱身準備中 (10 秒)...';
             statusCaption.style.color = 'var(--warning-color)';
-            return;
-        }
 
-        timerState = 'warmup';
-        warmupRemaining = WARMUP_TOTAL;
-        elapsedSeconds = 0;
+            btnStart.style.display = 'none';
+            btnPause.style.display = 'flex';
+            btnResume.style.display = 'none';
+            btnReset.style.display = 'flex';
 
-        // UI 狀態切換為熱身倒數模式
-        inputsView.style.display = 'none';
-        runningView.style.display = 'flex';
-        timeDisplay.innerText = formatTime(warmupRemaining);
-        targetSubtext.innerText = `準備中 (目標 ${formatTime(targetSeconds)})`;
-        countNumberVal.innerText = '預備';
-        countIndicator.className = 'count-badge-indicator active';
-        statusCaption.innerText = '熱身準備中 (10 秒)...';
-        statusCaption.style.color = 'var(--warning-color)';
+            updateProgress(0, WARMUP_TOTAL, 'var(--warning-color)');
+            requestWakeLock();
 
-        btnStart.style.display = 'none';
-        btnPause.style.display = 'flex';
-        btnResume.style.display = 'none';
-        btnReset.style.display = 'flex';
+            if (!timerWorker) {
+                try {
+                    timerWorker = createWorkerTimer();
+                    timerWorker.onmessage = () => onSecondTick();
+                } catch (err) {
+                    timerWorker = null;
+                }
+            }
 
-        updateProgress(0, WARMUP_TOTAL, 'var(--warning-color)');
-        requestWakeLock();
-
-        if (!timerWorker) {
-            try {
-                timerWorker = createWorkerTimer();
-                timerWorker.onmessage = () => onSecondTick();
-            } catch (err) {
-                timerWorker = null;
+            if (timerWorker) {
+                timerWorker.postMessage('start');
+            } else {
+                window.activeInterval = setInterval(onSecondTick, 1000);
             }
         }
 
-        if (timerWorker) {
-            timerWorker.postMessage('start');
-        } else {
-            window.activeInterval = setInterval(onSecondTick, 1000);
+        // 暫停計時
+        function handlePause() {
+            if (timerState !== 'running' && timerState !== 'warmup') return;
+            const wasWarmup = (timerState === 'warmup');
+            timerState = wasWarmup ? 'warmup_paused' : 'paused';
+
+            if (timerWorker) timerWorker.postMessage('stop');
+            if (window.activeInterval) clearInterval(window.activeInterval);
+            if ('speechSynthesis' in window) window.speechSynthesis.pause();
+
+            btnPause.style.display = 'none';
+            btnResume.style.display = 'flex';
+            statusCaption.innerText = wasWarmup ? '熱身暫停中' : '已暫停';
+            statusCaption.style.color = 'var(--warning-color)';
+            countIndicator.classList.remove('pulsing');
+            releaseWakeLock();
         }
-    }
 
-    // 暫停計時
-    function handlePause() {
-        if (timerState !== 'running' && timerState !== 'warmup') return;
-        const wasWarmup = (timerState === 'warmup');
-        timerState = wasWarmup ? 'warmup_paused' : 'paused';
+        // 繼續計時
+        function handleResume() {
+            if (timerState !== 'paused' && timerState !== 'warmup_paused') return;
+            const isWarmup = (timerState === 'warmup_paused');
+            timerState = isWarmup ? 'warmup' : 'running';
+            initAudio();
 
-        if (timerWorker) timerWorker.postMessage('stop');
-        if (window.activeInterval) clearInterval(window.activeInterval);
-        if ('speechSynthesis' in window) window.speechSynthesis.pause();
+            if ('speechSynthesis' in window) window.speechSynthesis.resume();
 
-        btnPause.style.display = 'none';
-        btnResume.style.display = 'flex';
-        statusCaption.innerText = wasWarmup ? '熱身暫停中' : '已暫停';
-        statusCaption.style.color = 'var(--warning-color)';
-        countIndicator.classList.remove('pulsing');
-        releaseWakeLock();
-    }
+            btnPause.style.display = 'flex';
+            btnResume.style.display = 'none';
+            statusCaption.innerText = isWarmup ? '熱身準備中...' : '計時進行中...';
+            statusCaption.style.color = isWarmup ? 'var(--warning-color)' : 'var(--accent-primary)';
+            requestWakeLock();
 
-    // 繼續計時
-    function handleResume() {
-        if (timerState !== 'paused' && timerState !== 'warmup_paused') return;
-        const isWarmup = (timerState === 'warmup_paused');
-        timerState = isWarmup ? 'warmup' : 'running';
-        initAudio();
-
-        if ('speechSynthesis' in window) window.speechSynthesis.resume();
-
-        btnPause.style.display = 'flex';
-        btnResume.style.display = 'none';
-        statusCaption.innerText = isWarmup ? '熱身準備中...' : '計時進行中...';
-        statusCaption.style.color = isWarmup ? 'var(--warning-color)' : 'var(--accent-primary)';
-        requestWakeLock();
-
-        if (timerWorker) {
-            timerWorker.postMessage('start');
-        } else {
-            window.activeInterval = setInterval(onSecondTick, 1000);
+            if (timerWorker) {
+                timerWorker.postMessage('start');
+            } else {
+                window.activeInterval = setInterval(onSecondTick, 1000);
+            }
         }
-    }
 
-    // 完成計時
-    function handleComplete() {
-        timerState = 'finished';
-        if (timerWorker) timerWorker.postMessage('stop');
-        if (window.activeInterval) clearInterval(window.activeInterval);
+        // 完成計時
+        function handleComplete() {
+            timerState = 'finished';
+            if (timerWorker) timerWorker.postMessage('stop');
+            if (window.activeInterval) clearInterval(window.activeInterval);
 
-        playFinishedChime();
-        triggerHaptic([80, 50, 80, 50, 120]);
-        releaseWakeLock();
+            playFinishedChime();
+            triggerHaptic([80, 50, 80, 50, 120]);
+            releaseWakeLock();
 
-        statusCaption.innerText = '計時已完成！';
-        statusCaption.style.color = 'var(--success-color)';
-        btnPause.style.display = 'none';
-        btnResume.style.display = 'none';
-        btnReset.style.display = 'flex';
-    }
+            statusCaption.innerText = '計時已完成！';
+            statusCaption.style.color = 'var(--success-color)';
+            btnPause.style.display = 'none';
+            btnResume.style.display = 'none';
+            btnReset.style.display = 'flex';
+        }
 
-    // 重置計時器
-    function handleReset() {
-        timerState = 'idle';
-        warmupRemaining = WARMUP_TOTAL;
-        if (timerWorker) timerWorker.postMessage('stop');
-        if (window.activeInterval) clearInterval(window.activeInterval);
-        if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-        releaseWakeLock();
+        // 重置計時器
+        function handleReset() {
+            timerState = 'idle';
+            warmupRemaining = WARMUP_TOTAL;
+            if (timerWorker) timerWorker.postMessage('stop');
+            if (window.activeInterval) clearInterval(window.activeInterval);
+            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+            releaseWakeLock();
 
-        elapsedSeconds = 0;
+            elapsedSeconds = 0;
 
-        inputsView.style.display = 'flex';
-        runningView.style.display = 'none';
-        countNumberVal.innerText = '0';
-        countIndicator.className = 'count-badge-indicator';
-        statusCaption.innerText = '等待開始...';
-        statusCaption.style.color = 'var(--text-muted)';
+            inputsView.style.display = 'flex';
+            runningView.style.display = 'none';
+            countNumberVal.innerText = '0';
+            countIndicator.className = 'count-badge-indicator';
+            statusCaption.innerText = '等待開始...';
+            statusCaption.style.color = 'var(--text-muted)';
 
-        btnStart.style.display = 'flex';
-        btnPause.style.display = 'none';
-        btnResume.style.display = 'none';
-        btnReset.style.display = 'none';
+            btnStart.style.display = 'flex';
+            btnPause.style.display = 'none';
+            btnResume.style.display = 'none';
+            btnReset.style.display = 'none';
 
-        updateProgress(0, 1);
-    }
+            updateProgress(0, 1);
+        }
 
-    // 預載語音清單
-    if ('speechSynthesis' in window) {
-        window.speechSynthesis.onvoiceschanged = () => {
+        // 預載語音清單
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.onvoiceschanged = () => {
+                window.speechSynthesis.getVoices();
+            };
             window.speechSynthesis.getVoices();
-        };
-        window.speechSynthesis.getVoices();
-    }
+        }
 
-    // 註冊 PWA Service Worker
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('./sw.js').catch(() => {});
+        // 註冊 PWA Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(() => { });
+            });
+        }
+
+        // 游標點入自動開啟數字鍵盤並清空預設值以便打字，失焦為空時自動補回預設
+        inputMin.addEventListener('focus', function () {
+            if (this.value === '10' || this.value === '0') {
+                this.value = '';
+            }
         });
-    }
+        inputMin.addEventListener('blur', function () {
+            if (!this.value.trim()) {
+                this.value = '10';
+            }
+        });
 
-    // 游標點入自動開啟數字鍵盤並清空預設值以便打字，失焦為空時自動補回預設
-    inputMin.addEventListener('focus', function() {
-        if (this.value === '10' || this.value === '0') {
-            this.value = '';
-        }
-    });
-    inputMin.addEventListener('blur', function() {
-        if (!this.value.trim()) {
-            this.value = '10';
-        }
-    });
+        inputSec.addEventListener('focus', function () {
+            if (this.value === '0' || this.value === '00') {
+                this.value = '';
+            }
+        });
+        inputSec.addEventListener('blur', function () {
+            if (!this.value.trim()) {
+                this.value = '0';
+            }
+        });
 
-    inputSec.addEventListener('focus', function() {
-        if (this.value === '0' || this.value === '00') {
-            this.value = '';
-        }
-    });
-    inputSec.addEventListener('blur', function() {
-        if (!this.value.trim()) {
-            this.value = '0';
-        }
-    });
-
-    // 初始化圓環進度
-    dialProgress.style.strokeDasharray = CIRCUMFERENCE;
-    dialProgress.style.strokeDashoffset = CIRCUMFERENCE;
-</script>
+        // 初始化圓環進度
+        dialProgress.style.strokeDasharray = CIRCUMFERENCE;
+        dialProgress.style.strokeDashoffset = CIRCUMFERENCE;
+    </script>
 </body>
+
 </html>
