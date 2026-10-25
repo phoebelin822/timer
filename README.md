@@ -57,9 +57,6 @@
 ├── index.html        # 主應用入口 (支援 GitHub Pages 預設加載)
 ├── manifest.json     # PWA 應用設定檔
 ├── sw.js             # Service Worker 離線快取腳本
-├── icons/            # PWA 高解析度圖標
-│   ├── icon-192.png
-│   └── icon-512.png
 └── README.md         # 專案說明與規範文件
 ```
 
