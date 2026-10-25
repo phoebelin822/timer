@@ -588,7 +588,9 @@
 
 <script>
     // 狀態變數
-    let timerState = 'idle'; // 'idle' | 'running' | 'paused' | 'finished'
+    let timerState = 'idle'; // 'idle' | 'warmup' | 'warmup_paused' | 'running' | 'paused' | 'finished'
+    let warmupRemaining = 10;
+    const WARMUP_TOTAL = 10;
     let elapsedSeconds = 0;
     let targetSeconds = 0;
     let audioCtx = null;
@@ -630,7 +632,7 @@
     }
 
     // 更新進度環
-    function updateProgress(elapsed, total) {
+    function updateProgress(elapsed, total, colorOverride = null) {
         if (!total || total <= 0) {
             dialProgress.style.strokeDashoffset = CIRCUMFERENCE;
             return;
@@ -639,7 +641,9 @@
         const offset = CIRCUMFERENCE - (ratio * CIRCUMFERENCE);
         dialProgress.style.strokeDashoffset = offset;
 
-        if (ratio >= 1) {
+        if (colorOverride) {
+            dialProgress.style.stroke = colorOverride;
+        } else if (ratio >= 1) {
             dialProgress.style.stroke = 'var(--success-color)';
         } else {
             dialProgress.style.stroke = 'var(--accent-primary)';
@@ -787,11 +791,11 @@
     }
 
     // 語音播報
-    function speakCount(num) {
+    function speakText(text) {
         if (!speechEnabled || !('speechSynthesis' in window)) return;
         try {
             window.speechSynthesis.cancel();
-            const utter = new SpeechSynthesisUtterance(num.toString());
+            const utter = new SpeechSynthesisUtterance(text.toString());
             utter.lang = 'zh-TW';
             utter.rate = 1.0;
             utter.pitch = 1.0;
@@ -834,6 +838,45 @@
 
     // 每秒步進核心邏輯
     function onSecondTick() {
+        // 熱身預備階段處理
+        if (timerState === 'warmup') {
+            warmupRemaining--;
+
+            // 更新熱身倒數文字與進度環 (以暖色橘黃呈現)
+            timeDisplay.innerText = formatTime(warmupRemaining);
+            updateProgress(WARMUP_TOTAL - warmupRemaining, WARMUP_TOTAL, 'var(--warning-color)');
+
+            if (warmupRemaining <= 5 && warmupRemaining >= 1) {
+                // 最後 5 秒進行語音倒數 (5, 4, 3, 2, 1)
+                speakText(warmupRemaining.toString());
+                countIndicator.classList.add('pulsing');
+                triggerHaptic(35);
+                setTimeout(() => countIndicator.classList.remove('pulsing'), 900);
+            } else {
+                playTickSound();
+            }
+
+            // 熱身 10 秒結束，立即進入正式計時
+            if (warmupRemaining <= 0) {
+                timerState = 'running';
+                elapsedSeconds = 0;
+                lastSpokenCount = 0;
+
+                timeDisplay.innerText = formatTime(0);
+                targetSubtext.innerText = `目標 ${formatTime(targetSeconds)}`;
+                statusCaption.innerText = '正式計時中...';
+                statusCaption.style.color = 'var(--accent-primary)';
+                updateProgress(0, targetSeconds);
+
+                // 播放開始提示提示音與語音
+                playCueSound();
+                speakText('開始');
+                triggerHaptic([60, 40, 60]);
+            }
+            return;
+        }
+
+        // 正式計時階段處理
         if (timerState !== 'running') return;
         elapsedSeconds++;
 
@@ -850,7 +893,7 @@
                 lastSpokenCount = countNum;
                 countNumberVal.innerText = countNum;
                 countIndicator.classList.add('pulsing');
-                speakCount(countNum);
+                speakText(countNum.toString());
                 triggerHaptic(40);
                 setTimeout(() => countIndicator.classList.remove('pulsing'), 1000);
             } else {
@@ -869,7 +912,7 @@
         }
     }
 
-    // 啟動計時
+    // 啟動計時 (預設直接進入 10 秒熱身階段)
     function handleStart() {
         initAudio();
         const m = parseInt(inputMin.value, 10) || 0;
@@ -882,27 +925,28 @@
             return;
         }
 
-        timerState = 'running';
+        timerState = 'warmup';
+        warmupRemaining = WARMUP_TOTAL;
         elapsedSeconds = 0;
         lastSpokenCount = 0;
 
-        // UI 狀態切換
+        // UI 狀態切換為熱身倒數模式
         inputsView.style.display = 'none';
         runningView.style.display = 'flex';
         presetBar.style.display = 'none';
-        timeDisplay.innerText = formatTime(0);
-        targetSubtext.innerText = `目標 ${formatTime(targetSeconds)}`;
-        countNumberVal.innerText = '0';
+        timeDisplay.innerText = formatTime(warmupRemaining);
+        targetSubtext.innerText = `準備中 (目標 ${formatTime(targetSeconds)})`;
+        countNumberVal.innerText = '預備';
         countIndicator.className = 'count-badge-indicator active';
-        statusCaption.innerText = '計時進行中...';
-        statusCaption.style.color = 'var(--accent-primary)';
+        statusCaption.innerText = '熱身準備中 (10 秒)...';
+        statusCaption.style.color = 'var(--warning-color)';
 
         btnStart.style.display = 'none';
         btnPause.style.display = 'flex';
         btnResume.style.display = 'none';
         btnReset.style.display = 'flex';
 
-        updateProgress(0, targetSeconds);
+        updateProgress(0, WARMUP_TOTAL, 'var(--warning-color)');
         requestWakeLock();
 
         if (!timerWorker) {
@@ -923,8 +967,9 @@
 
     // 暫停計時
     function handlePause() {
-        if (timerState !== 'running') return;
-        timerState = 'paused';
+        if (timerState !== 'running' && timerState !== 'warmup') return;
+        const wasWarmup = (timerState === 'warmup');
+        timerState = wasWarmup ? 'warmup_paused' : 'paused';
 
         if (timerWorker) timerWorker.postMessage('stop');
         if (window.activeInterval) clearInterval(window.activeInterval);
@@ -932,7 +977,7 @@
 
         btnPause.style.display = 'none';
         btnResume.style.display = 'flex';
-        statusCaption.innerText = '已暫停';
+        statusCaption.innerText = wasWarmup ? '熱身暫停中' : '已暫停';
         statusCaption.style.color = 'var(--warning-color)';
         countIndicator.classList.remove('pulsing');
         releaseWakeLock();
@@ -940,16 +985,17 @@
 
     // 繼續計時
     function handleResume() {
-        if (timerState !== 'paused') return;
-        timerState = 'running';
+        if (timerState !== 'paused' && timerState !== 'warmup_paused') return;
+        const isWarmup = (timerState === 'warmup_paused');
+        timerState = isWarmup ? 'warmup' : 'running';
         initAudio();
 
         if ('speechSynthesis' in window) window.speechSynthesis.resume();
 
         btnPause.style.display = 'flex';
         btnResume.style.display = 'none';
-        statusCaption.innerText = '計時進行中...';
-        statusCaption.style.color = 'var(--accent-primary)';
+        statusCaption.innerText = isWarmup ? '熱身準備中...' : '計時進行中...';
+        statusCaption.style.color = isWarmup ? 'var(--warning-color)' : 'var(--accent-primary)';
         requestWakeLock();
 
         if (timerWorker) {
@@ -979,6 +1025,7 @@
     // 重置計時器
     function handleReset() {
         timerState = 'idle';
+        warmupRemaining = WARMUP_TOTAL;
         if (timerWorker) timerWorker.postMessage('stop');
         if (window.activeInterval) clearInterval(window.activeInterval);
         if ('speechSynthesis' in window) window.speechSynthesis.cancel();
