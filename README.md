@@ -66,3 +66,16 @@
 - **GitHub Pages 線上應用網址**：https://phoebelin822.github.io/timer/
 - **GitHub 專案庫網址**：https://github.com/phoebelin822/timer
 
+---
+
+## 版本紀錄
+
+- **v1.0.0** (2026-10-25)
+  - 接管gemini製作、更新功能與介面。
+  - 重構為深色現代美學介面，全域放大字級，整合當前報數與即時狀態橫幅。
+  - 新增預設 10 秒熱身與後 3 秒語音倒數。
+  - 導入高精準 Web Worker 獨立線程與 Screen Wake Lock 螢幕防休眠常亮鎖。
+  - 合成木魚敲擊聲與清脆雙音階提示音，微調音量達到與語音報數平衡。
+  - 支援 PWA 離線快取與 GitHub Pages 靜態部署。
+
+
