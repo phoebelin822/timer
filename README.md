@@ -1,8 +1,8 @@
-# 數數計時器 (Counting Timer)
+# timer數數計時器
 
 ## 專案發起與原始交付需求 (Project Brief)
 
-- **專案名稱**：數數計時器 (timer)
+- **專案名稱**：timer數數計時器
 - **發起時間**：2026-10-25
 - **設計/技術規範**：原生 HTML5 / CSS3 / Vanilla JavaScript、Web Audio API、Web Speech API、Screen Wake Lock API、PWA (Service Worker + Manifest)、GitHub Pages 靜態架構
 - **來源資料**：`https://github.com/phoebelin822/timer`

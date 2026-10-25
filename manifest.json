@@ -1,6 +1,6 @@
 {
-  "name": "數數計時器",
-  "short_name": "數數計時器",
+  "name": "timer數數計時器",
+  "short_name": "timer數數計時器",
   "description": "具備每10秒語音報數與每20秒提示音的高精準計時器",
   "start_url": "./index.html",
   "display": "standalone",
