@@ -5,9 +5,8 @@
 - **專案名稱**：timer數數計時器
 - **發起時間**：2026-10-25
 - **設計/技術規範**：原生 HTML5 / CSS3 / Vanilla JavaScript、Web Audio API、Web Speech API、Screen Wake Lock API、PWA (Service Worker + Manifest)、GitHub Pages 靜態架構
-- **來源資料**：`https://github.com/phoebelin822/timer`
 - **原始任務目標與交付文字**：
-> https://github.com/phoebelin822/timer
+> 建立 timer數數計時器
 
 ---
 
@@ -62,13 +61,8 @@
 
 ---
 
-## 本地測試與運行
+## 線上網址與儲存位置
 
-無需任何建置步驟，可直接以瀏覽器開啟 `index.html`，或使用靜態伺服器：
+- **GitHub Pages 線上應用網址**：https://phoebelin822.github.io/timer/
+- **GitHub 專案庫網址**：https://github.com/phoebelin822/timer
 
-```bash
-# 使用 Python 啟動本機伺服器
-python3 -m http.server 8080
-```
-
-開啟瀏覽器前往：`http://localhost:8080`
