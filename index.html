@@ -134,7 +134,7 @@
             align-items: center;
             justify-content: center;
             z-index: 2;
-            width: 220px;
+            width: 250px;
         }
 
         /* 輸入設定狀態 */
@@ -142,7 +142,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 14px;
+            gap: 12px;
+            width: 100%;
         }
 
         .input-group {
@@ -151,9 +152,11 @@
             align-items: center;
         }
 
-        input[type="number"] {
-            width: 86px;
-            height: 74px;
+        .time-input {
+            width: 96px;
+            height: 76px;
+            padding: 0 4px;
+            margin: 0;
             background-color: var(--surface-color);
             border: 2px solid var(--border-color);
             color: var(--text-primary);
@@ -163,16 +166,20 @@
             border-radius: 18px;
             outline: none;
             font-variant-numeric: tabular-nums;
+            box-sizing: border-box;
             transition: all 0.2s ease;
+            -webkit-appearance: none;
+            -moz-appearance: textfield;
         }
 
-        input[type="number"]:focus {
+        .time-input:focus {
             border-color: var(--accent-primary);
             box-shadow: 0 0 0 3px var(--accent-glow);
+            background-color: var(--surface-light);
         }
 
-        input[type="number"]::-webkit-inner-spin-button, 
-        input[type="number"]::-webkit-outer-spin-button { 
+        .time-input::-webkit-inner-spin-button, 
+        .time-input::-webkit-outer-spin-button { 
             -webkit-appearance: none; 
             margin: 0; 
         }
@@ -470,12 +477,12 @@
                 <!-- 時間設定檢視 -->
                 <div id="inputsView" class="inputs-view">
                     <div class="input-group">
-                        <input type="number" id="inputMin" value="10" min="0" max="999" aria-label="分鐘">
+                        <input type="tel" inputmode="numeric" pattern="[0-9]*" id="inputMin" class="time-input" value="10" maxlength="3" aria-label="分鐘">
                         <span class="input-label">分鐘</span>
                     </div>
                     <div class="time-colon">:</div>
                     <div class="input-group">
-                        <input type="number" id="inputSec" value="0" min="0" max="59" aria-label="秒數">
+                        <input type="tel" inputmode="numeric" pattern="[0-9]*" id="inputSec" class="time-input" value="0" maxlength="2" aria-label="秒數">
                         <span class="input-label">秒數</span>
                     </div>
                 </div>
@@ -634,6 +641,30 @@
         }
     }
 
+    let masterCompressor = null;
+    let masterGain = null;
+
+    // 取得音訊增益與動態壓縮輸出端 (放大 200%，即 3 倍功率輸出，並防破音破頻)
+    function getAudioOutput() {
+        if (!audioCtx) return null;
+        if (!masterCompressor) {
+            masterCompressor = audioCtx.createDynamicsCompressor();
+            masterCompressor.threshold.setValueAtTime(-14, audioCtx.currentTime);
+            masterCompressor.knee.setValueAtTime(25, audioCtx.currentTime);
+            masterCompressor.ratio.setValueAtTime(12, audioCtx.currentTime);
+            masterCompressor.attack.setValueAtTime(0.002, audioCtx.currentTime);
+            masterCompressor.release.setValueAtTime(0.2, audioCtx.currentTime);
+
+            masterGain = audioCtx.createGain();
+            // 音量全面再放大 200% (3 倍功率輸出)
+            masterGain.gain.setValueAtTime(3.0, audioCtx.currentTime);
+
+            masterCompressor.connect(masterGain);
+            masterGain.connect(audioCtx.destination);
+        }
+        return masterCompressor;
+    }
+
     // 音訊引擎初始化與 iOS 解鎖
     function initAudio() {
         if (!audioCtx) {
@@ -663,39 +694,40 @@
         }
     }
 
-    // 每秒敲木魚聲 (合成空靈清脆木魚共鳴，音量再放大 100%)
+    // 每秒敲木魚聲 (合成空靈清脆木魚共鳴，音量全面放大 200%)
     function playTickSound() {
         if (!tickEnabled || !audioCtx) return;
         try {
             const now = audioCtx.currentTime;
+            const out = getAudioOutput() || audioCtx.destination;
 
-            // 木魚腔體主共鳴 (由 680Hz 迅速滑落至 520Hz，音量放大至 0.60)
+            // 木魚腔體主共鳴 (由 680Hz 迅速滑落至 520Hz)
             const oscBody = audioCtx.createOscillator();
             const gainBody = audioCtx.createGain();
             oscBody.type = 'sine';
             oscBody.frequency.setValueAtTime(680, now);
-            oscBody.frequency.exponentialRampToValueAtTime(520, now + 0.045);
+            oscBody.frequency.exponentialRampToValueAtTime(520, now + 0.05);
 
-            gainBody.gain.setValueAtTime(0.60, now);
-            gainBody.gain.exponentialRampToValueAtTime(0.001, now + 0.085);
+            gainBody.gain.setValueAtTime(1.2, now);
+            gainBody.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
 
             oscBody.connect(gainBody);
-            gainBody.connect(audioCtx.destination);
+            gainBody.connect(out);
             oscBody.start(now);
-            oscBody.stop(now + 0.09);
+            oscBody.stop(now + 0.095);
 
-            // 木槌敲擊接觸點泛音 (1320Hz 泛音，音量放大至 0.25)
+            // 木槌敲擊接觸點泛音 (1320Hz 泛音)
             const oscClick = audioCtx.createOscillator();
             const gainClick = audioCtx.createGain();
             oscClick.type = 'triangle';
             oscClick.frequency.setValueAtTime(1320, now);
-            gainClick.gain.setValueAtTime(0.25, now);
-            gainClick.gain.exponentialRampToValueAtTime(0.001, now + 0.025);
+            gainClick.gain.setValueAtTime(0.5, now);
+            gainClick.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
 
             oscClick.connect(gainClick);
-            gainClick.connect(audioCtx.destination);
+            gainClick.connect(out);
             oscClick.start(now);
-            oscClick.stop(now + 0.03);
+            oscClick.stop(now + 0.035);
         } catch (e) {}
     }
 
@@ -703,48 +735,51 @@
     function playClassicTickSound() {
         if (!tickEnabled || !audioCtx) return;
         try {
+            const now = audioCtx.currentTime;
+            const out = getAudioOutput() || audioCtx.destination;
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             osc.type = 'sine';
-            osc.frequency.setValueAtTime(1400, audioCtx.currentTime);
-            gain.gain.setValueAtTime(0.36, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.03);
+            osc.frequency.setValueAtTime(1400, now);
+            gain.gain.setValueAtTime(0.8, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.035);
             osc.connect(gain);
-            gain.connect(audioCtx.destination);
+            gain.connect(out);
             osc.start();
-            osc.stop(audioCtx.currentTime + 0.035);
+            osc.stop(now + 0.04);
         } catch (e) {}
     }
 
-    // 每 20 秒交替提示音 (清脆雙音階提示，音量再放大 100%)
+    // 每 20 秒交替提示音 (清脆雙音階提示，音量全面放大 200%)
     function playCueSound() {
         if (!audioCtx) return;
         try {
             const now = audioCtx.currentTime;
+            const out = getAudioOutput() || audioCtx.destination;
             
-            // 第 1 音 (再放大 100% 至 0.95 滿載輸出)
+            // 第 1 音
             const osc1 = audioCtx.createOscillator();
             const gain1 = audioCtx.createGain();
             osc1.type = 'triangle';
             osc1.frequency.setValueAtTime(659.25, now); // E5
-            gain1.gain.setValueAtTime(0.95, now);
-            gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.16);
+            gain1.gain.setValueAtTime(1.4, now);
+            gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
             osc1.connect(gain1);
-            gain1.connect(audioCtx.destination);
+            gain1.connect(out);
             osc1.start(now);
-            osc1.stop(now + 0.16);
+            osc1.stop(now + 0.18);
 
-            // 第 2 音 (再放大 100% 至 1.0 滿載輸出)
+            // 第 2 音
             const osc2 = audioCtx.createOscillator();
             const gain2 = audioCtx.createGain();
             osc2.type = 'triangle';
             osc2.frequency.setValueAtTime(987.77, now + 0.08); // B5
-            gain2.gain.setValueAtTime(1.0, now + 0.08);
-            gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.32);
+            gain2.gain.setValueAtTime(1.6, now + 0.08);
+            gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
             osc2.connect(gain2);
-            gain2.connect(audioCtx.destination);
+            gain2.connect(out);
             osc2.start(now + 0.08);
-            osc2.stop(now + 0.32);
+            osc2.stop(now + 0.35);
         } catch (e) {}
     }
 
@@ -752,6 +787,7 @@
     function playFinishedChime() {
         if (!audioCtx) return;
         try {
+            const out = getAudioOutput() || audioCtx.destination;
             const chord = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
             chord.forEach((freq, idx) => {
                 const now = audioCtx.currentTime + (idx * 0.08);
@@ -759,10 +795,10 @@
                 const gain = audioCtx.createGain();
                 osc.type = 'sine';
                 osc.frequency.setValueAtTime(freq, now);
-                gain.gain.setValueAtTime(0.35, now);
+                gain.gain.setValueAtTime(0.7, now);
                 gain.gain.exponentialRampToValueAtTime(0.001, now + 0.85);
                 osc.connect(gain);
-                gain.connect(audioCtx.destination);
+                gain.connect(out);
                 osc.start(now);
                 osc.stop(now + 0.9);
             });
@@ -1038,6 +1074,29 @@
             navigator.serviceWorker.register('./sw.js').catch(() => {});
         });
     }
+
+    // 游標點入自動開啟數字鍵盤並清空預設值以便打字，失焦為空時自動補回預設
+    inputMin.addEventListener('focus', function() {
+        if (this.value === '10' || this.value === '0') {
+            this.value = '';
+        }
+    });
+    inputMin.addEventListener('blur', function() {
+        if (!this.value.trim()) {
+            this.value = '10';
+        }
+    });
+
+    inputSec.addEventListener('focus', function() {
+        if (this.value === '0' || this.value === '00') {
+            this.value = '';
+        }
+    });
+    inputSec.addEventListener('blur', function() {
+        if (!this.value.trim()) {
+            this.value = '0';
+        }
+    });
 
     // 初始化圓環進度
     dialProgress.style.strokeDasharray = CIRCUMFERENCE;
