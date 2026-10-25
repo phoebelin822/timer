@@ -5,280 +5,1022 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="數數計時器">
+    <meta name="theme-color" content="#090d16">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="apple-touch-icon" href="./icons/icon-192.png">
     <title>數數計時器</title>
-    <!-- 移除 Tailwind CDN，全部改為內聯原生 CSS 確保在任何環境下都能正常顯示 -->
     <style>
+        :root {
+            --bg-color: #090d16;
+            --surface-color: #131b2e;
+            --surface-light: #1e293b;
+            --border-color: #2b384f;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent-primary: #6366f1;
+            --accent-primary-hover: #4f46e5;
+            --accent-glow: rgba(99, 102, 241, 0.25);
+            --success-color: #10b981;
+            --success-glow: rgba(16, 185, 129, 0.2);
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --danger-surface: rgba(239, 68, 68, 0.12);
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: #0f172a;
-            color: #f1f5f9;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
             margin: 0;
-            height: 100dvh;
+            padding: 0;
+            min-height: 100dvh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: space-between;
-            padding: 40px 20px;
-            box-sizing: border-box;
             user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-        
-        /* 隱藏數字輸入框的上下箭頭 */
-        input[type="number"]::-webkit-inner-spin-button, 
-        input[type="number"]::-webkit-outer-spin-button { 
-            -webkit-appearance: none; margin: 0; 
+            overflow-x: hidden;
         }
 
-        .header { text-align: center; }
-        .title { font-size: 32px; font-weight: 700; margin: 0 0 8px 0; letter-spacing: 2px; }
-        .subtitle { color: #94a3b8; font-size: 14px; margin: 0; }
-
-        .main {
-            flex: 1;
+        .container {
+            width: 100%;
+            max-width: 440px;
+            min-height: 100dvh;
+            padding: 24px 20px calc(24px + env(safe-area-inset-bottom));
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: space-between;
+        }
+
+        /* 標頭區域 */
+        .header {
+            text-align: center;
+            padding-top: max(12px, env(safe-area-inset-top));
+        }
+
+        .badge-header {
+            display: inline-flex;
             align-items: center;
+            gap: 6px;
+            background-color: rgba(99, 102, 241, 0.12);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            color: #a5b4fc;
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+
+        .title {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            margin: 0 0 6px 0;
+            color: var(--text-primary);
+        }
+
+        .subtitle {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin: 0;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+        }
+
+        /* 核心中央區塊 */
+        .main-stage {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            margin: 16px 0;
             width: 100%;
         }
 
-        .inputs { display: flex; align-items: center; gap: 16px; }
-        .input-col { display: flex; flex-direction: column; align-items: center; }
-        
+        /* 圓形進度環與時間展示 */
+        .timer-dial-container {
+            position: relative;
+            width: 260px;
+            height: 260px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .dial-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .dial-bg {
+            fill: none;
+            stroke: var(--surface-light);
+            stroke-width: 8;
+        }
+
+        .dial-progress {
+            fill: none;
+            stroke: var(--accent-primary);
+            stroke-width: 8;
+            stroke-linecap: round;
+            stroke-dasharray: 754;
+            stroke-dashoffset: 754;
+            transition: stroke-dashoffset 0.3s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.3s ease;
+        }
+
+        .dial-content {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+            width: 200px;
+        }
+
+        /* 輸入設定狀態 */
+        .inputs-view {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
         input[type="number"] {
-            width: 80px;
-            height: 70px;
-            background-color: #1e293b;
-            border: 2px solid #334155;
-            color: #fff;
-            font-size: 40px;
+            width: 74px;
+            height: 64px;
+            background-color: var(--surface-color);
+            border: 2px solid var(--border-color);
+            color: var(--text-primary);
+            font-size: 34px;
             font-weight: 700;
             text-align: center;
             border-radius: 16px;
             outline: none;
-            transition: border-color 0.2s;
-        }
-        input[type="number"]:focus { border-color: #4f46e5; }
-        
-        .colon { font-size: 48px; color: #475569; margin-bottom: 24px; font-weight: 300; }
-        label { font-size: 12px; color: #64748b; margin-top: 10px; font-weight: 600; letter-spacing: 1px; }
-
-        .display {
-            font-size: 88px;
-            font-weight: 800;
-            color: #818cf8;
-            display: none;
             font-variant-numeric: tabular-nums;
-            letter-spacing: -2px;
-            font-family: monospace;
+            transition: all 0.2s ease;
         }
 
-        .status { font-size: 15px; color: #64748b; margin-top: 24px; height: 20px; font-weight: 500; }
-
-        .footer { width: 100%; max-width: 340px; display: flex; flex-direction: column; gap: 16px; }
-        
-        .btn {
-            width: 100%;
-            border: none;
-            border-radius: 16px;
-            padding: 20px;
-            font-size: 20px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: transform 0.1s, background-color 0.2s;
+        input[type="number"]:focus {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px var(--accent-glow);
         }
-        .btn:active { transform: scale(0.96); }
 
-        .btn-toggle {
-            background-color: #1e293b;
-            border: 2px solid #334155;
-            color: #cbd5e1;
-            display: flex;
-            justify-content: space-between;
+        input[type="number"]::-webkit-inner-spin-button, 
+        input[type="number"]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+
+        .time-colon {
+            font-size: 38px;
+            color: var(--text-muted);
+            font-weight: 300;
+            line-height: 1;
+            margin-bottom: 20px;
+        }
+
+        .input-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 8px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        /* 執行中時間展示 */
+        .running-view {
+            display: none;
+            flex-direction: column;
             align-items: center;
-            font-size: 18px;
-            padding: 16px 20px;
         }
-        
-        .badge {
-            background-color: #334155;
-            color: #cbd5e1;
-            font-size: 13px;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-weight: bold;
-        }
-        .badge.on { background-color: rgba(16,185,129,0.2); color: #34d399; }
 
-        .btn-start { background-color: #4f46e5; color: #fff; box-shadow: 0 8px 20px rgba(79,70,229,0.4); }
-        .btn-stop { background-color: #1e293b; color: #f43f5e; display: none; border: 2px solid #334155; }
+        .time-display {
+            font-size: 64px;
+            font-weight: 800;
+            color: var(--text-primary);
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -1.5px;
+            line-height: 1;
+            margin: 0;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+
+        .target-subtext {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 8px;
+            font-weight: 500;
+        }
+
+        /* 快速預設時長按鈕 */
+        .preset-bar {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 14px;
+            flex-wrap: wrap;
+        }
+
+        .preset-chip {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .preset-chip:active {
+            transform: scale(0.95);
+            background-color: var(--surface-light);
+            color: var(--text-primary);
+        }
+
+        /* 報數狀態卡片 */
+        .count-card {
+            margin-top: 20px;
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(19, 27, 46, 0.9));
+            border: 1px solid var(--border-color);
+            padding: 12px 24px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-height: 48px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            transition: all 0.25s ease;
+        }
+
+        .count-badge-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: var(--text-muted);
+            transition: all 0.25s ease;
+        }
+
+        .count-badge-indicator.active {
+            background-color: var(--success-color);
+            box-shadow: 0 0 10px var(--success-color);
+        }
+
+        .count-badge-indicator.pulsing {
+            animation: pulse-ring 1s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1.1); box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        .count-text-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .count-number-val {
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--success-color);
+            font-variant-numeric: tabular-nums;
+            min-width: 32px;
+            text-align: center;
+        }
+
+        .status-caption {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 12px;
+            font-weight: 500;
+            height: 18px;
+            text-align: center;
+        }
+
+        /* 控制按鈕與設定區塊 */
+        .controls-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+        }
+
+        /* 開關選項群組 */
+        .settings-bar {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .toggle-btn {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            border-radius: 16px;
+            padding: 12px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .toggle-btn:active {
+            transform: scale(0.97);
+        }
+
+        .toggle-btn.active {
+            background-color: var(--surface-light);
+            border-color: rgba(99, 102, 241, 0.4);
+            color: var(--text-primary);
+        }
+
+        .pill-switch {
+            width: 36px;
+            height: 20px;
+            background-color: #334155;
+            border-radius: 10px;
+            position: relative;
+            transition: background-color 0.2s ease;
+        }
+
+        .pill-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background-color: #fff;
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .toggle-btn.active .pill-switch {
+            background-color: var(--success-color);
+        }
+
+        .toggle-btn.active .pill-switch::after {
+            transform: translateX(16px);
+        }
+
+        /* 動作按鈕 */
+        .action-btns {
+            display: flex;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 18px;
+            padding: 18px;
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none;
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+        }
+
+        .btn-primary {
+            flex: 1;
+            background-color: var(--accent-primary);
+            color: #ffffff;
+            box-shadow: 0 8px 24px var(--accent-glow);
+        }
+
+        .btn-primary:active {
+            background-color: var(--accent-primary-hover);
+        }
+
+        .btn-pause {
+            flex: 1;
+            background-color: rgba(245, 158, 11, 0.15);
+            border: 1px solid rgba(245, 158, 11, 0.4);
+            color: var(--warning-color);
+        }
+
+        .btn-resume {
+            flex: 1;
+            background-color: var(--success-color);
+            color: #ffffff;
+            box-shadow: 0 8px 24px var(--success-glow);
+        }
+
+        .btn-reset {
+            width: 72px;
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            color: var(--danger-color);
+        }
+
+        .btn-reset:active {
+            background-color: var(--danger-surface);
+        }
+
+        /* 輔助資訊 */
+        .footer-info {
+            text-align: center;
+            font-size: 11px;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+            padding-top: 8px;
+        }
+
+        /* SVG 圖標無樣式 */
+        .icon {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            stroke-width: 2.2;
+            stroke: currentColor;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <div class="title">數數計時器</div>
-        <div class="subtitle">10秒報數 / 20秒提示</div>
-    </div>
+<div class="container">
+    <!-- 標頭資訊 -->
+    <header class="header">
+        <div class="badge-header">
+            <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            <span>高精準定時核心</span>
+        </div>
+        <h1 class="title">數數計時器</h1>
+        <p class="subtitle">10 秒語音報數 / 20 秒交替提示音</p>
+    </header>
 
-    <div class="main">
-        <div id="ig" class="inputs">
-            <div class="input-col">
-                <input type="number" id="m" value="10" min="0">
-                <label>分鐘</label>
-            </div>
-            <div class="colon">:</div>
-            <div class="input-col">
-                <input type="number" id="s" value="0" min="0" max="59">
-                <label>秒數</label>
+    <!-- 中央核心區 -->
+    <main class="main-stage">
+        <!-- 圓形進度環與時鐘 -->
+        <div class="timer-dial-container">
+            <svg class="dial-svg" viewBox="0 0 260 260">
+                <circle class="dial-bg" cx="130" cy="130" r="120"></circle>
+                <circle id="dialProgress" class="dial-progress" cx="130" cy="130" r="120"></circle>
+            </svg>
+
+            <div class="dial-content">
+                <!-- 時間設定檢視 -->
+                <div id="inputsView" class="inputs-view">
+                    <div class="input-group">
+                        <input type="number" id="inputMin" value="10" min="0" max="999" aria-label="分鐘">
+                        <span class="input-label">分鐘</span>
+                    </div>
+                    <div class="time-colon">:</div>
+                    <div class="input-group">
+                        <input type="number" id="inputSec" value="0" min="0" max="59" aria-label="秒數">
+                        <span class="input-label">秒數</span>
+                    </div>
+                </div>
+
+                <!-- 運行時間檢視 -->
+                <div id="runningView" class="running-view">
+                    <p id="timeDisplay" class="time-display">00:00</p>
+                    <span id="targetSubtext" class="target-subtext">目標 10:00</span>
+                </div>
             </div>
         </div>
 
-        <div id="d" class="display">10:00</div>
-        
-        <!-- 新增報數顯示區塊 (預設隱藏) -->
-        <div id="spokenDisplay" style="display: none; font-size: 24px; color: #34d399; font-weight: bold; margin-top: 20px; letter-spacing: 1px;">目前報數：0</div>
+        <!-- 快速時長預設鈕 (僅在未開始時顯示) -->
+        <div id="presetBar" class="preset-bar">
+            <button class="preset-chip" type="button" onclick="setPreset(3, 0)">3 分</button>
+            <button class="preset-chip" type="button" onclick="setPreset(5, 0)">5 分</button>
+            <button class="preset-chip" type="button" onclick="setPreset(10, 0)">10 分</button>
+            <button class="preset-chip" type="button" onclick="setPreset(15, 0)">15 分</button>
+            <button class="preset-chip" type="button" onclick="setPreset(20, 0)">20 分</button>
+        </div>
 
-        <div id="st" class="status">等待開始...</div>
-    </div>
+        <!-- 當前報數指示卡 -->
+        <div class="count-card">
+            <div id="countIndicator" class="count-badge-indicator"></div>
+            <span class="count-text-label">當前報數</span>
+            <span id="countNumberVal" class="count-number-val">0</span>
+        </div>
 
-    <div class="footer">
-        <button id="tb" class="btn btn-toggle" onclick="tt()">
-            <span>每秒滴答聲</span>
-            <span id="ts" class="badge">已關閉</span>
-        </button>
-        <button id="sb" class="btn btn-start" onclick="start()">開始</button>
-        <button id="stb" class="btn btn-stop" onclick="stop()">重置</button>
-    </div>
+        <!-- 狀態文字說明 -->
+        <div id="statusCaption" class="status-caption">等待開始...</div>
+    </main>
 
-    <script>
-        let t = null, e = 0, tg = 0, ac = null, tk = false, ul = false;
-        
-        // 預載語音引擎
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.getVoices();
+    <!-- 控制面版與設定 -->
+    <footer class="controls-panel">
+        <div class="settings-bar">
+            <button id="toggleTickBtn" class="toggle-btn" type="button" onclick="toggleTick()">
+                <span>每秒滴答聲</span>
+                <span class="pill-switch"></span>
+            </button>
+            <button id="toggleSpeechBtn" class="toggle-btn active" type="button" onclick="toggleSpeech()">
+                <span>語音報數</span>
+                <span class="pill-switch"></span>
+            </button>
+        </div>
+
+        <div class="action-btns">
+            <!-- 開始按鈕 -->
+            <button id="btnStart" class="btn btn-primary" type="button" onclick="handleStart()">
+                <svg class="icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                <span>開始計時</span>
+            </button>
+
+            <!-- 暫停按鈕 -->
+            <button id="btnPause" class="btn btn-pause" type="button" style="display: none;" onclick="handlePause()">
+                <svg class="icon" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+                <span>暫停</span>
+            </button>
+
+            <!-- 繼續按鈕 -->
+            <button id="btnResume" class="btn btn-resume" type="button" style="display: none;" onclick="handleResume()">
+                <svg class="icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                <span>繼續</span>
+            </button>
+
+            <!-- 重置按鈕 -->
+            <button id="btnReset" class="btn btn-reset" type="button" style="display: none;" onclick="handleReset()">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+            </button>
+        </div>
+
+        <div class="footer-info">
+            支援 iOS / Android PWA 離線安裝與螢幕常亮防止休眠
+        </div>
+    </footer>
+</div>
+
+<script>
+    // 狀態變數
+    let timerState = 'idle'; // 'idle' | 'running' | 'paused' | 'finished'
+    let elapsedSeconds = 0;
+    let targetSeconds = 0;
+    let audioCtx = null;
+    let tickEnabled = false;
+    let speechEnabled = true;
+    let audioUnlocked = false;
+    let wakeLock = null;
+    let timerWorker = null;
+    let startTimeRef = 0;
+    let accumulatedPauseTime = 0;
+    let lastSpokenCount = 0;
+
+    const CIRCUMFERENCE = 2 * Math.PI * 120; // 約 753.98
+
+    // DOM 元素快取
+    const inputMin = document.getElementById('inputMin');
+    const inputSec = document.getElementById('inputSec');
+    const inputsView = document.getElementById('inputsView');
+    const runningView = document.getElementById('runningView');
+    const timeDisplay = document.getElementById('timeDisplay');
+    const targetSubtext = document.getElementById('targetSubtext');
+    const presetBar = document.getElementById('presetBar');
+    const dialProgress = document.getElementById('dialProgress');
+    const countNumberVal = document.getElementById('countNumberVal');
+    const countIndicator = document.getElementById('countIndicator');
+    const statusCaption = document.getElementById('statusCaption');
+    const btnStart = document.getElementById('btnStart');
+    const btnPause = document.getElementById('btnPause');
+    const btnResume = document.getElementById('btnResume');
+    const btnReset = document.getElementById('btnReset');
+    const toggleTickBtn = document.getElementById('toggleTickBtn');
+    const toggleSpeechBtn = document.getElementById('toggleSpeechBtn');
+
+    // 格式化秒數為 mm:ss
+    function formatTime(sec) {
+        const m = Math.floor(sec / 60).toString().padStart(2, '0');
+        const s = (sec % 60).toString().padStart(2, '0');
+        return `${m}:${s}`;
+    }
+
+    // 更新進度環
+    function updateProgress(elapsed, total) {
+        if (!total || total <= 0) {
+            dialProgress.style.strokeDashoffset = CIRCUMFERENCE;
+            return;
+        }
+        const ratio = Math.min(elapsed / total, 1);
+        const offset = CIRCUMFERENCE - (ratio * CIRCUMFERENCE);
+        dialProgress.style.strokeDashoffset = offset;
+
+        if (ratio >= 1) {
+            dialProgress.style.stroke = 'var(--success-color)';
+        } else {
+            dialProgress.style.stroke = 'var(--accent-primary)';
+        }
+    }
+
+    // 預設時長設定
+    function setPreset(min, sec) {
+        if (timerState !== 'idle') return;
+        inputMin.value = min;
+        inputSec.value = sec;
+    }
+
+    // 滴答聲開關切換
+    function toggleTick() {
+        tickEnabled = !tickEnabled;
+        toggleTickBtn.classList.toggle('active', tickEnabled);
+        if (tickEnabled && !audioUnlocked) initAudio();
+    }
+
+    // 語音報數開關切換
+    function toggleSpeech() {
+        speechEnabled = !speechEnabled;
+        toggleSpeechBtn.classList.toggle('active', speechEnabled);
+    }
+
+    // 螢幕常亮喚醒鎖 (Screen Wake Lock API)
+    async function requestWakeLock() {
+        try {
+            if ('wakeLock' in navigator && !wakeLock) {
+                wakeLock = await navigator.wakeLock.request('screen');
+                wakeLock.addEventListener('release', () => {
+                    wakeLock = null;
+                });
+            }
+        } catch (err) {
+            // 不支援或拒絕，靜默忽略
+        }
+    }
+
+    function releaseWakeLock() {
+        if (wakeLock) {
+            wakeLock.release().catch(() => {});
+            wakeLock = null;
+        }
+    }
+
+    // 音訊引擎初始化與 iOS 解鎖
+    function initAudio() {
+        if (!audioCtx) {
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (AudioContextClass) {
+                audioCtx = new AudioContextClass();
+            }
+        }
+        if (audioCtx && audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+        if (!audioUnlocked && audioCtx) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            gain.gain.value = 0;
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.01);
+
+            if ('speechSynthesis' in window) {
+                const dummy = new SpeechSynthesisUtterance('');
+                dummy.volume = 0;
+                window.speechSynthesis.speak(dummy);
+            }
+            audioUnlocked = true;
+        }
+    }
+
+    // 每秒滴答音效 (清晰木質/數位微點)
+    function playTickSound() {
+        if (!tickEnabled || !audioCtx) return;
+        try {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(1400, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.03);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.035);
+        } catch (e) {}
+    }
+
+    // 每 20 秒交替提示音 (清脆雙音階提示)
+    function playCueSound() {
+        if (!audioCtx) return;
+        try {
+            const now = audioCtx.currentTime;
+            
+            // 第 1 音
+            const osc1 = audioCtx.createOscillator();
+            const gain1 = audioCtx.createGain();
+            osc1.type = 'triangle';
+            osc1.frequency.setValueAtTime(659.25, now); // E5
+            gain1.gain.setValueAtTime(0.25, now);
+            gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+            osc1.connect(gain1);
+            gain1.connect(audioCtx.destination);
+            osc1.start(now);
+            osc1.stop(now + 0.12);
+
+            // 第 2 音
+            const osc2 = audioCtx.createOscillator();
+            const gain2 = audioCtx.createGain();
+            osc2.type = 'triangle';
+            osc2.frequency.setValueAtTime(987.77, now + 0.08); // B5
+            gain2.gain.setValueAtTime(0.3, now + 0.08);
+            gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+            osc2.connect(gain2);
+            gain2.connect(audioCtx.destination);
+            osc2.start(now + 0.08);
+            osc2.stop(now + 0.25);
+        } catch (e) {}
+    }
+
+    // 完成時的和弦音效
+    function playFinishedChime() {
+        if (!audioCtx) return;
+        try {
+            const chord = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+            chord.forEach((freq, idx) => {
+                const now = audioCtx.currentTime + (idx * 0.08);
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, now);
+                gain.gain.setValueAtTime(0.25, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now);
+                osc.stop(now + 0.85);
+            });
+        } catch (e) {}
+    }
+
+    // 語音播報
+    function speakCount(num) {
+        if (!speechEnabled || !('speechSynthesis' in window)) return;
+        try {
+            window.speechSynthesis.cancel();
+            const utter = new SpeechSynthesisUtterance(num.toString());
+            utter.lang = 'zh-TW';
+            utter.rate = 1.0;
+            utter.pitch = 1.0;
+
+            const voices = window.speechSynthesis.getVoices();
+            const preferred = voices.find(v => v.lang.includes('zh') && (v.name.includes('Hsiao') || v.name.includes('Yating') || v.name.includes('女') || v.name.toLowerCase().includes('taiwan')));
+            const fallback = voices.find(v => v.lang.includes('zh-TW')) || voices.find(v => v.lang.includes('zh'));
+            if (preferred) utter.voice = preferred;
+            else if (fallback) utter.voice = fallback;
+
+            window.speechSynthesis.speak(utter);
+        } catch (e) {}
+    }
+
+    // 震動回饋 (行動裝置支援時)
+    function triggerHaptic(duration = 20) {
+        if ('vibrate' in navigator) {
+            try { navigator.vibrate(duration); } catch (e) {}
+        }
+    }
+
+    // Web Worker 後台高精準計時器
+    function createWorkerTimer() {
+        const workerBlob = new Blob([`
+            let interval = null;
+            self.onmessage = function(e) {
+                if (e.data === 'start') {
+                    if (interval) clearInterval(interval);
+                    interval = setInterval(() => {
+                        self.postMessage('tick');
+                    }, 1000);
+                } else if (e.data === 'stop') {
+                    if (interval) clearInterval(interval);
+                    interval = null;
+                }
+            };
+        `], { type: 'application/javascript' });
+        return new Worker(URL.createObjectURL(workerBlob));
+    }
+
+    // 每秒步進核心邏輯
+    function onSecondTick() {
+        if (timerState !== 'running') return;
+        elapsedSeconds++;
+
+        // 更新畫面時間與進度環
+        timeDisplay.innerText = formatTime(elapsedSeconds);
+        updateProgress(elapsedSeconds, targetSeconds);
+
+        // 規則核心：每 10 秒週期判定
+        if (elapsedSeconds % 10 === 0) {
+            const step = elapsedSeconds / 10;
+            if (step % 2 !== 0) {
+                // 10s, 30s, 50s, 70s... 語音報數
+                const countNum = Math.ceil(step / 2);
+                lastSpokenCount = countNum;
+                countNumberVal.innerText = countNum;
+                countIndicator.classList.add('pulsing');
+                speakCount(countNum);
+                triggerHaptic(40);
+                setTimeout(() => countIndicator.classList.remove('pulsing'), 1000);
+            } else {
+                // 20s, 40s, 60s, 80s... 提示音效
+                playCueSound();
+                triggerHaptic([20, 40, 20]);
+            }
+        } else {
+            // 一般秒數播放滴答聲
+            playTickSound();
         }
 
-        function fmt(s) {
-            let m = Math.floor(s / 60).toString().padStart(2, '0');
-            let se = (s % 60).toString().padStart(2, '0');
-            return m + ':' + se;
+        // 達到目標時間完成
+        if (elapsedSeconds >= targetSeconds) {
+            handleComplete();
+        }
+    }
+
+    // 啟動計時
+    function handleStart() {
+        initAudio();
+        const m = parseInt(inputMin.value, 10) || 0;
+        const s = parseInt(inputSec.value, 10) || 0;
+        targetSeconds = (m * 60) + s;
+
+        if (targetSeconds <= 0) {
+            statusCaption.innerText = '請設定大於 0 秒的目標時間';
+            statusCaption.style.color = 'var(--warning-color)';
+            return;
         }
 
-        function tt() {
-            tk = !tk;
-            let s = document.getElementById('ts');
-            s.innerText = tk ? '已開啟' : '已關閉';
-            s.className = tk ? 'badge on' : 'badge';
-        }
+        timerState = 'running';
+        elapsedSeconds = 0;
+        lastSpokenCount = 0;
 
-        function ia() {
-            if (!ac) ac = new (window.AudioContext || window.webkitAudioContext)();
-            if (ac.state === 'suspended') ac.resume();
-            if (!ul) {
-                // 解鎖 iOS 音效
-                let o = ac.createOscillator(), g = ac.createGain();
-                g.gain.value = 0; o.connect(g); g.connect(ac.destination);
-                o.start(); o.stop(ac.currentTime + 0.01);
-                // 解鎖 iOS 語音
-                if ('speechSynthesis' in window) window.speechSynthesis.speak(new SpeechSynthesisUtterance(''));
-                ul = true;
+        // UI 狀態切換
+        inputsView.style.display = 'none';
+        runningView.style.display = 'flex';
+        presetBar.style.display = 'none';
+        timeDisplay.innerText = formatTime(0);
+        targetSubtext.innerText = `目標 ${formatTime(targetSeconds)}`;
+        countNumberVal.innerText = '0';
+        countIndicator.className = 'count-badge-indicator active';
+        statusCaption.innerText = '計時進行中...';
+        statusCaption.style.color = 'var(--accent-primary)';
+
+        btnStart.style.display = 'none';
+        btnPause.style.display = 'flex';
+        btnResume.style.display = 'none';
+        btnReset.style.display = 'flex';
+
+        updateProgress(0, targetSeconds);
+        requestWakeLock();
+
+        if (!timerWorker) {
+            try {
+                timerWorker = createWorkerTimer();
+                timerWorker.onmessage = () => onSecondTick();
+            } catch (err) {
+                timerWorker = null;
             }
         }
 
-        function pt() {
-            if (!tk || !ac) return;
-            let o = ac.createOscillator(), g = ac.createGain();
-            o.type = 'sine'; o.frequency.value = 1200;
-            g.gain.setValueAtTime(0.20, ac.currentTime);
-            g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.05);
-            o.connect(g); g.connect(ac.destination);
-            o.start(); o.stop(ac.currentTime + 0.05);
+        if (timerWorker) {
+            timerWorker.postMessage('start');
+        } else {
+            window.activeInterval = setInterval(onSecondTick, 1000);
         }
+    }
 
-        function pf() {
-            if (!ac) return;
-            let o = ac.createOscillator(), g = ac.createGain();
-            o.type = 'triangle'; o.frequency.setValueAtTime(800, ac.currentTime);
-            o.frequency.exponentialRampToValueAtTime(100, ac.currentTime + 0.1);
-            g.gain.setValueAtTime(1, ac.currentTime);
-            g.gain.exponentialRampToValueAtTime(0.01, ac.currentTime + 0.1);
-            o.connect(g); g.connect(ac.destination);
-            o.start(); o.stop(ac.currentTime + 0.1);
+    // 暫停計時
+    function handlePause() {
+        if (timerState !== 'running') return;
+        timerState = 'paused';
+
+        if (timerWorker) timerWorker.postMessage('stop');
+        if (window.activeInterval) clearInterval(window.activeInterval);
+        if ('speechSynthesis' in window) window.speechSynthesis.pause();
+
+        btnPause.style.display = 'none';
+        btnResume.style.display = 'flex';
+        statusCaption.innerText = '已暫停';
+        statusCaption.style.color = 'var(--warning-color)';
+        countIndicator.classList.remove('pulsing');
+        releaseWakeLock();
+    }
+
+    // 繼續計時
+    function handleResume() {
+        if (timerState !== 'paused') return;
+        timerState = 'running';
+        initAudio();
+
+        if ('speechSynthesis' in window) window.speechSynthesis.resume();
+
+        btnPause.style.display = 'flex';
+        btnResume.style.display = 'none';
+        statusCaption.innerText = '計時進行中...';
+        statusCaption.style.color = 'var(--accent-primary)';
+        requestWakeLock();
+
+        if (timerWorker) {
+            timerWorker.postMessage('start');
+        } else {
+            window.activeInterval = setInterval(onSecondTick, 1000);
         }
+    }
 
-        function sp(n) {
-            if (!('speechSynthesis' in window)) return;
-            window.speechSynthesis.cancel();
+    // 完成計時
+    function handleComplete() {
+        timerState = 'finished';
+        if (timerWorker) timerWorker.postMessage('stop');
+        if (window.activeInterval) clearInterval(window.activeInterval);
 
-            // 新增：更新畫面上的報數數字
-            document.getElementById('spokenDisplay').innerText = '目前報數：' + n;
+        playFinishedChime();
+        triggerHaptic([80, 50, 80, 50, 120]);
+        releaseWakeLock();
 
-            let m = new SpeechSynthesisUtterance(n.toString());
-            m.lang = 'zh-TW';
-            let vs = window.speechSynthesis.getVoices();
-            let mv = vs.find(v => v.lang.includes('zh') && (v.name.toLowerCase().includes('male') || v.name.includes('男')));
-            let fb = vs.find(v => v.lang.includes('zh-TW'));
-            m.voice = mv || fb;
-            window.speechSynthesis.speak(m);
-        }
+        statusCaption.innerText = '計時已完成！';
+        statusCaption.style.color = 'var(--success-color)';
+        btnPause.style.display = 'none';
+        btnResume.style.display = 'none';
+        btnReset.style.display = 'flex';
+    }
 
-        function start() {
-            if (t) return;
-            ia();
-            tg = (parseInt(document.getElementById('m').value) || 0) * 60 + (parseInt(document.getElementById('s').value) || 0);
-            if (tg <= 0) return;
-            
-            e = 0;
-            document.getElementById('ig').style.display = 'none';
-            document.getElementById('d').style.display = 'block';
-            
-            // 新增：開始時顯示並重置報數區塊
-            document.getElementById('spokenDisplay').style.display = 'block';
-            document.getElementById('spokenDisplay').innerText = '目前報數：0';
+    // 重置計時器
+    function handleReset() {
+        timerState = 'idle';
+        if (timerWorker) timerWorker.postMessage('stop');
+        if (window.activeInterval) clearInterval(window.activeInterval);
+        if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+        releaseWakeLock();
 
-            document.getElementById('sb').style.display = 'none';
-            document.getElementById('stb').style.display = 'block';
-            document.getElementById('st').innerText = '計時中...';
-            document.getElementById('st').style.color = '#818cf8';
-            document.getElementById('d').innerText = fmt(e);
-            
-            t = setInterval(() => {
-                e++;
-                document.getElementById('d').innerText = fmt(e);
-                
-                if (e % 10 === 0) {
-                    let stp = e / 10;
-                    if (stp % 2 !== 0) sp(Math.ceil(stp / 2));
-                    else pf();
-                } else {
-                    pt();
-                }
+        elapsedSeconds = 0;
+        lastSpokenCount = 0;
 
-                if (e >= tg) {
-                    stop();
-                    document.getElementById('st').innerText = '計時完成！';
-                    document.getElementById('st').style.color = '#34d399';
-                }
-            }, 1000);
-        }
+        inputsView.style.display = 'flex';
+        runningView.style.display = 'none';
+        presetBar.style.display = 'flex';
+        countNumberVal.innerText = '0';
+        countIndicator.className = 'count-badge-indicator';
+        statusCaption.innerText = '等待開始...';
+        statusCaption.style.color = 'var(--text-muted)';
 
-        function stop() {
-            if (t) clearInterval(t);
-            t = null; e = 0;
-            document.getElementById('ig').style.display = 'flex';
-            document.getElementById('d').style.display = 'none';
-            
-            // 新增：停止時隱藏報數區塊
-            document.getElementById('spokenDisplay').style.display = 'none';
+        btnStart.style.display = 'flex';
+        btnPause.style.display = 'none';
+        btnResume.style.display = 'none';
+        btnReset.style.display = 'none';
 
-            document.getElementById('sb').style.display = 'block';
-            document.getElementById('stb').style.display = 'none';
-            document.getElementById('st').innerText = '等待開始...';
-            document.getElementById('st').style.color = '#64748b';
-            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-        }
-    </script>
+        updateProgress(0, 1);
+    }
+
+    // 預載語音清單
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.onvoiceschanged = () => {
+            window.speechSynthesis.getVoices();
+        };
+        window.speechSynthesis.getVoices();
+    }
+
+    // 註冊 PWA Service Worker
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js').catch(() => {});
+        });
+    }
+
+    // 初始化圓環進度
+    dialProgress.style.strokeDasharray = CIRCUMFERENCE;
+    dialProgress.style.strokeDashoffset = CIRCUMFERENCE;
+</script>
 </body>
 </html>
