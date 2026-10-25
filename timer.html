@@ -62,34 +62,19 @@
         /* 標頭區域 */
         .header {
             text-align: center;
-            padding-top: max(12px, env(safe-area-inset-top));
-        }
-
-        .badge-header {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background-color: rgba(99, 102, 241, 0.12);
-            border: 1px solid rgba(99, 102, 241, 0.3);
-            color: #a5b4fc;
-            padding: 4px 12px;
-            border-radius: 999px;
-            font-size: 12px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            margin-bottom: 10px;
+            padding-top: max(16px, env(safe-area-inset-top));
         }
 
         .title {
-            font-size: 28px;
+            font-size: 34px;
             font-weight: 800;
             letter-spacing: 1.5px;
-            margin: 0 0 6px 0;
+            margin: 0 0 8px 0;
             color: var(--text-primary);
         }
 
         .subtitle {
-            font-size: 13px;
+            font-size: 16px;
             color: var(--text-secondary);
             margin: 0;
             font-weight: 400;
@@ -103,15 +88,15 @@
             align-items: center;
             justify-content: center;
             position: relative;
-            margin: 16px 0;
+            margin: 20px 0;
             width: 100%;
         }
 
         /* 圓形進度環與時間展示 */
         .timer-dial-container {
             position: relative;
-            width: 260px;
-            height: 260px;
+            width: 270px;
+            height: 270px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -149,7 +134,7 @@
             align-items: center;
             justify-content: center;
             z-index: 2;
-            width: 200px;
+            width: 220px;
         }
 
         /* 輸入設定狀態 */
@@ -157,7 +142,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 12px;
+            gap: 14px;
         }
 
         .input-group {
@@ -167,15 +152,15 @@
         }
 
         input[type="number"] {
-            width: 74px;
-            height: 64px;
+            width: 86px;
+            height: 74px;
             background-color: var(--surface-color);
             border: 2px solid var(--border-color);
             color: var(--text-primary);
-            font-size: 34px;
+            font-size: 42px;
             font-weight: 700;
             text-align: center;
-            border-radius: 16px;
+            border-radius: 18px;
             outline: none;
             font-variant-numeric: tabular-nums;
             transition: all 0.2s ease;
@@ -193,15 +178,15 @@
         }
 
         .time-colon {
-            font-size: 38px;
+            font-size: 46px;
             color: var(--text-muted);
             font-weight: 300;
             line-height: 1;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
         }
 
         .input-label {
-            font-size: 11px;
+            font-size: 14px;
             color: var(--text-muted);
             margin-top: 8px;
             font-weight: 600;
@@ -216,61 +201,34 @@
         }
 
         .time-display {
-            font-size: 64px;
+            font-size: 76px;
             font-weight: 800;
             color: var(--text-primary);
             font-variant-numeric: tabular-nums;
-            letter-spacing: -1.5px;
+            letter-spacing: -2px;
             line-height: 1;
             margin: 0;
             font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
         }
 
         .target-subtext {
-            font-size: 13px;
+            font-size: 16px;
             color: var(--text-muted);
-            margin-top: 8px;
+            margin-top: 10px;
             font-weight: 500;
         }
 
-        /* 快速預設時長按鈕 */
-        .preset-bar {
-            display: flex;
-            gap: 8px;
-            justify-content: center;
-            margin-top: 14px;
-            flex-wrap: wrap;
-        }
-
-        .preset-chip {
-            background-color: var(--surface-color);
-            border: 1px solid var(--border-color);
-            color: var(--text-secondary);
-            font-size: 13px;
-            font-weight: 600;
-            padding: 6px 12px;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.15s ease;
-        }
-
-        .preset-chip:active {
-            transform: scale(0.95);
-            background-color: var(--surface-light);
-            color: var(--text-primary);
-        }
-
-        /* 報數狀態卡片 */
+        /* 當前報數與狀態整合卡片 */
         .count-card {
-            margin-top: 20px;
-            background: linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(19, 27, 46, 0.9));
+            margin-top: 26px;
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.75), rgba(19, 27, 46, 0.95));
             border: 1px solid var(--border-color);
-            padding: 12px 24px;
+            padding: 12px 22px;
             border-radius: 20px;
             display: flex;
             align-items: center;
-            gap: 12px;
-            min-height: 48px;
+            gap: 10px;
+            min-height: 52px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
@@ -278,10 +236,11 @@
         }
 
         .count-badge-indicator {
-            width: 10px;
-            height: 10px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
             background-color: var(--text-muted);
+            flex-shrink: 0;
             transition: all 0.25s ease;
         }
 
@@ -296,39 +255,49 @@
 
         @keyframes pulse-ring {
             0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-            70% { transform: scale(1.1); box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+            70% { transform: scale(1.15); box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
             100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
         }
 
         .count-text-label {
-            font-size: 13px;
+            font-size: 16px;
             color: var(--text-secondary);
             font-weight: 500;
+            white-space: nowrap;
         }
 
         .count-number-val {
-            font-size: 26px;
+            font-size: 32px;
             font-weight: 800;
             color: var(--success-color);
             font-variant-numeric: tabular-nums;
             min-width: 32px;
             text-align: center;
+            line-height: 1;
+        }
+
+        .status-divider {
+            color: var(--text-muted);
+            font-size: 16px;
+            user-select: none;
+            opacity: 0.6;
+            margin: 0 2px;
         }
 
         .status-caption {
-            font-size: 13px;
+            font-size: 15px;
             color: var(--text-muted);
-            margin-top: 12px;
-            font-weight: 500;
-            height: 18px;
-            text-align: center;
+            font-weight: 600;
+            white-space: nowrap;
+            line-height: 1;
+            transition: color 0.2s ease;
         }
 
         /* 控制按鈕與設定區塊 */
         .controls-panel {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 14px;
             width: 100%;
         }
 
@@ -336,7 +305,7 @@
         .settings-bar {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
+            gap: 12px;
         }
 
         .toggle-btn {
@@ -344,8 +313,8 @@
             border: 1px solid var(--border-color);
             color: var(--text-secondary);
             border-radius: 16px;
-            padding: 12px 14px;
-            font-size: 13px;
+            padding: 14px 16px;
+            font-size: 16px;
             font-weight: 600;
             display: flex;
             align-items: center;
@@ -365,11 +334,12 @@
         }
 
         .pill-switch {
-            width: 36px;
-            height: 20px;
+            width: 38px;
+            height: 22px;
             background-color: #334155;
-            border-radius: 10px;
+            border-radius: 11px;
             position: relative;
+            flex-shrink: 0;
             transition: background-color 0.2s ease;
         }
 
@@ -378,8 +348,8 @@
             position: absolute;
             top: 2px;
             left: 2px;
-            width: 16px;
-            height: 16px;
+            width: 18px;
+            height: 18px;
             border-radius: 50%;
             background-color: #fff;
             transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -402,9 +372,9 @@
 
         .btn {
             border: none;
-            border-radius: 18px;
-            padding: 18px;
-            font-size: 18px;
+            border-radius: 20px;
+            padding: 20px;
+            font-size: 21px;
             font-weight: 700;
             letter-spacing: 0.5px;
             cursor: pointer;
@@ -446,7 +416,7 @@
         }
 
         .btn-reset {
-            width: 72px;
+            width: 78px;
             background-color: var(--surface-color);
             border: 1px solid var(--border-color);
             color: var(--danger-color);
@@ -459,17 +429,17 @@
         /* 輔助資訊 */
         .footer-info {
             text-align: center;
-            font-size: 11px;
+            font-size: 13px;
             color: var(--text-muted);
             letter-spacing: 0.5px;
-            padding-top: 8px;
+            padding-top: 6px;
         }
 
         /* SVG 圖標無樣式 */
         .icon {
             display: inline-block;
-            width: 18px;
-            height: 18px;
+            width: 22px;
+            height: 22px;
             stroke-width: 2.2;
             stroke: currentColor;
             fill: none;
@@ -483,10 +453,6 @@
 <div class="container">
     <!-- 標頭資訊 -->
     <header class="header">
-        <div class="badge-header">
-            <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-            <span>高精準定時核心</span>
-        </div>
         <h1 class="title">數數計時器</h1>
         <p class="subtitle">10 秒語音報數 / 20 秒交替提示音</p>
     </header>
@@ -495,9 +461,9 @@
     <main class="main-stage">
         <!-- 圓形進度環與時鐘 -->
         <div class="timer-dial-container">
-            <svg class="dial-svg" viewBox="0 0 260 260">
-                <circle class="dial-bg" cx="130" cy="130" r="120"></circle>
-                <circle id="dialProgress" class="dial-progress" cx="130" cy="130" r="120"></circle>
+            <svg class="dial-svg" viewBox="0 0 270 270">
+                <circle class="dial-bg" cx="135" cy="135" r="120"></circle>
+                <circle id="dialProgress" class="dial-progress" cx="135" cy="135" r="120"></circle>
             </svg>
 
             <div class="dial-content">
@@ -522,31 +488,21 @@
             </div>
         </div>
 
-        <!-- 快速時長預設鈕 (僅在未開始時顯示) -->
-        <div id="presetBar" class="preset-bar">
-            <button class="preset-chip" type="button" onclick="setPreset(3, 0)">3 分</button>
-            <button class="preset-chip" type="button" onclick="setPreset(5, 0)">5 分</button>
-            <button class="preset-chip" type="button" onclick="setPreset(10, 0)">10 分</button>
-            <button class="preset-chip" type="button" onclick="setPreset(15, 0)">15 分</button>
-            <button class="preset-chip" type="button" onclick="setPreset(20, 0)">20 分</button>
-        </div>
-
-        <!-- 當前報數指示卡 -->
+        <!-- 當前報數與即時狀態整合卡片 -->
         <div class="count-card">
             <div id="countIndicator" class="count-badge-indicator"></div>
             <span class="count-text-label">當前報數</span>
             <span id="countNumberVal" class="count-number-val">0</span>
+            <span class="status-divider">·</span>
+            <span id="statusCaption" class="status-caption">等待開始...</span>
         </div>
-
-        <!-- 狀態文字說明 -->
-        <div id="statusCaption" class="status-caption">等待開始...</div>
     </main>
 
     <!-- 控制面版與設定 -->
     <footer class="controls-panel">
         <div class="settings-bar">
             <button id="toggleTickBtn" class="toggle-btn" type="button" onclick="toggleTick()">
-                <span>每秒滴答聲</span>
+                <span>每秒木魚聲</span>
                 <span class="pill-switch"></span>
             </button>
             <button id="toggleSpeechBtn" class="toggle-btn active" type="button" onclick="toggleSpeech()">
@@ -599,9 +555,6 @@
     let audioUnlocked = false;
     let wakeLock = null;
     let timerWorker = null;
-    let startTimeRef = 0;
-    let accumulatedPauseTime = 0;
-    let lastSpokenCount = 0;
 
     const CIRCUMFERENCE = 2 * Math.PI * 120; // 約 753.98
 
@@ -612,7 +565,6 @@
     const runningView = document.getElementById('runningView');
     const timeDisplay = document.getElementById('timeDisplay');
     const targetSubtext = document.getElementById('targetSubtext');
-    const presetBar = document.getElementById('presetBar');
     const dialProgress = document.getElementById('dialProgress');
     const countNumberVal = document.getElementById('countNumberVal');
     const countIndicator = document.getElementById('countIndicator');
@@ -650,13 +602,6 @@
         }
     }
 
-    // 預設時長設定
-    function setPreset(min, sec) {
-        if (timerState !== 'idle') return;
-        inputMin.value = min;
-        inputSec.value = sec;
-    }
-
     // 滴答聲開關切換
     function toggleTick() {
         tickEnabled = !tickEnabled;
@@ -679,9 +624,7 @@
                     wakeLock = null;
                 });
             }
-        } catch (err) {
-            // 不支援或拒絕，靜默忽略
-        }
+        } catch (err) {}
     }
 
     function releaseWakeLock() {
@@ -720,15 +663,51 @@
         }
     }
 
-    // 每秒滴答音效 (清晰木質/數位微點)
+    // 每秒敲木魚聲 (合成空靈清脆木魚共鳴，音量放大 50%)
     function playTickSound() {
+        if (!tickEnabled || !audioCtx) return;
+        try {
+            const now = audioCtx.currentTime;
+
+            // 木魚腔體主共鳴 (由 680Hz 迅速滑落至 520Hz)
+            const oscBody = audioCtx.createOscillator();
+            const gainBody = audioCtx.createGain();
+            oscBody.type = 'sine';
+            oscBody.frequency.setValueAtTime(680, now);
+            oscBody.frequency.exponentialRampToValueAtTime(520, now + 0.04);
+
+            gainBody.gain.setValueAtTime(0.28, now);
+            gainBody.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
+
+            oscBody.connect(gainBody);
+            gainBody.connect(audioCtx.destination);
+            oscBody.start(now);
+            oscBody.stop(now + 0.075);
+
+            // 木槌敲擊接觸點泛音 (1320Hz 瞬間點綴)
+            const oscClick = audioCtx.createOscillator();
+            const gainClick = audioCtx.createGain();
+            oscClick.type = 'triangle';
+            oscClick.frequency.setValueAtTime(1320, now);
+            gainClick.gain.setValueAtTime(0.12, now);
+            gainClick.gain.exponentialRampToValueAtTime(0.001, now + 0.02);
+
+            oscClick.connect(gainClick);
+            gainClick.connect(audioCtx.destination);
+            oscClick.start(now);
+            oscClick.stop(now + 0.025);
+        } catch (e) {}
+    }
+
+    // 備用原始滴答聲 (可隨時切換)
+    function playClassicTickSound() {
         if (!tickEnabled || !audioCtx) return;
         try {
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             osc.type = 'sine';
             osc.frequency.setValueAtTime(1400, audioCtx.currentTime);
-            gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.18, audioCtx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.03);
             osc.connect(gain);
             gain.connect(audioCtx.destination);
@@ -737,35 +716,35 @@
         } catch (e) {}
     }
 
-    // 每 20 秒交替提示音 (清脆雙音階提示)
+    // 每 20 秒交替提示音 (清脆雙音階提示，音量放大 100%)
     function playCueSound() {
         if (!audioCtx) return;
         try {
             const now = audioCtx.currentTime;
             
-            // 第 1 音
+            // 第 1 音 (放大 100% 至 0.55)
             const osc1 = audioCtx.createOscillator();
             const gain1 = audioCtx.createGain();
             osc1.type = 'triangle';
             osc1.frequency.setValueAtTime(659.25, now); // E5
-            gain1.gain.setValueAtTime(0.25, now);
-            gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+            gain1.gain.setValueAtTime(0.55, now);
+            gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.14);
             osc1.connect(gain1);
             gain1.connect(audioCtx.destination);
             osc1.start(now);
-            osc1.stop(now + 0.12);
+            osc1.stop(now + 0.14);
 
-            // 第 2 音
+            // 第 2 音 (放大 100% 至 0.65)
             const osc2 = audioCtx.createOscillator();
             const gain2 = audioCtx.createGain();
             osc2.type = 'triangle';
             osc2.frequency.setValueAtTime(987.77, now + 0.08); // B5
-            gain2.gain.setValueAtTime(0.3, now + 0.08);
-            gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+            gain2.gain.setValueAtTime(0.65, now + 0.08);
+            gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.28);
             osc2.connect(gain2);
             gain2.connect(audioCtx.destination);
             osc2.start(now + 0.08);
-            osc2.stop(now + 0.25);
+            osc2.stop(now + 0.28);
         } catch (e) {}
     }
 
@@ -780,12 +759,12 @@
                 const gain = audioCtx.createGain();
                 osc.type = 'sine';
                 osc.frequency.setValueAtTime(freq, now);
-                gain.gain.setValueAtTime(0.25, now);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+                gain.gain.setValueAtTime(0.35, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.85);
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
                 osc.start(now);
-                osc.stop(now + 0.85);
+                osc.stop(now + 0.9);
             });
         } catch (e) {}
     }
@@ -838,16 +817,16 @@
 
     // 每秒步進核心邏輯
     function onSecondTick() {
-        // 熱身預備階段處理
+        // 熱身預備階段處理 (10秒，最後3秒語音倒數 3, 2, 1)
         if (timerState === 'warmup') {
             warmupRemaining--;
 
-            // 更新熱身倒數文字與進度環 (以暖色橘黃呈現)
+            // 更新熱身倒數文字與進度環 (以暖色呈現)
             timeDisplay.innerText = formatTime(warmupRemaining);
             updateProgress(WARMUP_TOTAL - warmupRemaining, WARMUP_TOTAL, 'var(--warning-color)');
 
-            if (warmupRemaining <= 5 && warmupRemaining >= 1) {
-                // 最後 5 秒進行語音倒數 (5, 4, 3, 2, 1)
+            if (warmupRemaining <= 3 && warmupRemaining >= 1) {
+                // 最後 3 秒進行語音倒數 (3, 2, 1)
                 speakText(warmupRemaining.toString());
                 countIndicator.classList.add('pulsing');
                 triggerHaptic(35);
@@ -856,19 +835,19 @@
                 playTickSound();
             }
 
-            // 熱身 10 秒結束，立即進入正式計時
+            // 熱身結束，立即進入正式計時
             if (warmupRemaining <= 0) {
                 timerState = 'running';
                 elapsedSeconds = 0;
-                lastSpokenCount = 0;
 
                 timeDisplay.innerText = formatTime(0);
                 targetSubtext.innerText = `目標 ${formatTime(targetSeconds)}`;
+                countNumberVal.innerText = '0';
                 statusCaption.innerText = '正式計時中...';
                 statusCaption.style.color = 'var(--accent-primary)';
                 updateProgress(0, targetSeconds);
 
-                // 播放開始提示提示音與語音
+                // 播放開始提示音與語音
                 playCueSound();
                 speakText('開始');
                 triggerHaptic([60, 40, 60]);
@@ -890,7 +869,6 @@
             if (step % 2 !== 0) {
                 // 10s, 30s, 50s, 70s... 語音報數
                 const countNum = Math.ceil(step / 2);
-                lastSpokenCount = countNum;
                 countNumberVal.innerText = countNum;
                 countIndicator.classList.add('pulsing');
                 speakText(countNum.toString());
@@ -902,7 +880,7 @@
                 triggerHaptic([20, 40, 20]);
             }
         } else {
-            // 一般秒數播放滴答聲
+            // 一般秒數播放木魚聲
             playTickSound();
         }
 
@@ -920,7 +898,7 @@
         targetSeconds = (m * 60) + s;
 
         if (targetSeconds <= 0) {
-            statusCaption.innerText = '請設定大於 0 秒的目標時間';
+            statusCaption.innerText = '請設定大於 0 秒的時間';
             statusCaption.style.color = 'var(--warning-color)';
             return;
         }
@@ -928,12 +906,10 @@
         timerState = 'warmup';
         warmupRemaining = WARMUP_TOTAL;
         elapsedSeconds = 0;
-        lastSpokenCount = 0;
 
         // UI 狀態切換為熱身倒數模式
         inputsView.style.display = 'none';
         runningView.style.display = 'flex';
-        presetBar.style.display = 'none';
         timeDisplay.innerText = formatTime(warmupRemaining);
         targetSubtext.innerText = `準備中 (目標 ${formatTime(targetSeconds)})`;
         countNumberVal.innerText = '預備';
@@ -1032,11 +1008,9 @@
         releaseWakeLock();
 
         elapsedSeconds = 0;
-        lastSpokenCount = 0;
 
         inputsView.style.display = 'flex';
         runningView.style.display = 'none';
-        presetBar.style.display = 'flex';
         countNumberVal.innerText = '0';
         countIndicator.className = 'count-badge-indicator';
         statusCaption.innerText = '等待開始...';
